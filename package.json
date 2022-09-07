@@ -1,0 +1,26 @@
+{
+  "name": "embed_bot",
+  "version": "1.0.0",
+  "description": "",
+  "keywords": [],
+  "author": "Reformed",
+  "main": "bot.js",
+  "scripts": {
+    "start": "node bot.js",
+    "deploy": "node deploy-commands.js",
+    "watch": "npm-watch"
+  },
+  "watch": {
+    "start": "*.js"
+  },
+  "dependencies": {
+    "discord.js": "^14.3.0",
+    "moment": "^2.29.4",
+    "sqlite3": "^5.0.11"
+  },
+  "devDependencies": {
+    "@discordjs/rest": "^1.1.0",
+    "eslint": "^8.22.0",
+    "npm-watch": "^0.11.0"
+  }
+}
