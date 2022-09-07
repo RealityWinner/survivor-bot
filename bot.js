@@ -9,16 +9,20 @@ db.serialize(() => {
   db.run("CREATE TABLE IF NOT EXISTS codes (code TEXT NOT NULL UNIQUE, used BOOL DEFAULT FALSE)");
   db.run("CREATE TABLE IF NOT EXISTS players (discordid TEXT NOT NULL, playerid TEXT NOT NULL, code TEXT NOT NULL, date DATETIME DEFAULT CURRENT_TIMESTAMP)");
 
-  let i = 0;
-  while (i<1000) {
-    db.run("INSERT INTO codes(code) VALUES(?)", [`TEST-${i++}`], () => {});
-  }
+  const fs = require('fs');
+  const allFileContents = fs.readFileSync('codes.txt', 'utf-8');
+  allFileContents.split(/\r?\n/).forEach(line =>  {
+    line = line.trim()
+    if (line.length) {
+      db.run("INSERT INTO codes(code) VALUES(?)", [line], () => {});
+    }
+  });
 });
 
 const client = new Client({
 	intents: [
 		GatewayIntentBits.Guilds,
-		GatewayIntentBits.GuildMembers,
+		// GatewayIntentBits.GuildMembers,
 		// GatewayIntentBits.GuildMessages,
 		// GatewayIntentBits.MessageContent,
 	],
@@ -47,7 +51,7 @@ client.on('interactionCreate', async interaction => {
     print('slash command:', interaction.commandName);
 
     if (!interaction.member.permissions.has(PermissionsBitField.Flags.Administrator)) {
-      return interaction.reply({ content: `Sorry only admins :()`, ephemeral: true });
+      return interaction.reply({ content: `Sorry only admins :(`, ephemeral: true });
     }
 
 
@@ -60,7 +64,7 @@ client.on('interactionCreate', async interaction => {
             let claimDate = moment(row.date).unix();
             return `Discord: ${row.discordid} PlayerId: ${row.playerid} Code: ${row.code} RedeemedAt: <t:${claimDate}:f> <t:${claimDate}:R>`
           }).join('\n')
-          return interaction.reply({ content: msg, ephemeral: true });
+          return interaction.reply({ content: msg || "None", ephemeral: true });
         });
       }
       if (interaction.options.getSubcommand() === 'id') {
@@ -73,7 +77,7 @@ client.on('interactionCreate', async interaction => {
             let claimDate = moment(row.date).unix();
             return `Discord: ${row.discordid} PlayerId: ${row.playerid} Code: ${row.code} RedeemedAt: <t:${claimDate}:f> <t:${claimDate}:R>`
           }).join('\n')
-          return interaction.reply({ content: msg, ephemeral: true });
+          return interaction.reply({ content: msg || "None", ephemeral: true });
         });
       }
     }
@@ -153,7 +157,7 @@ client.on('interactionCreate', async interaction => {
         }
 
         print(`Got code ${row.code}`);
-        db.run("UPDATE codes SET used=TRUE WHERE code = ?", [row.code], (err) => {
+        db.run("UPDATE codes SET used=TRUE WHERE code = ? AND used=FALSE", [row.code], (err) => {
           if (err) {
             return print(err); //TODO Handle
           }

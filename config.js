@@ -13,5 +13,5 @@ module.exports = {
     isDeveloper: isDeveloper,
     clientId: '1016712297214902333', //survivor dev bot
     logChannel: '1016911305585737811', //survivor dev bot #logs
-    token: process.env.TOKEN,
+    token: process.env.TOKEN || 'MTAxNjcxMjI5NzIxNDkwMjMzMw.GQxhz7.YrtrH5WIIeA19oZFgRzZEriMzun5A7nwC3I6Cw',
 };
