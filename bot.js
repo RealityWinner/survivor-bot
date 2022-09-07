@@ -114,7 +114,10 @@ client.on('interactionCreate', async interaction => {
       .setLabel("What is your survivor.io player id")
       .setStyle(TextInputStyle.Short);
     modal.addComponents(new ActionRowBuilder().addComponents(playerIdInput));
-    return await interaction.showModal(modal);
+    try {
+      await interaction.showModal(modal);
+    } catch (error) {}
+    return
 
   } else if (interaction.isModalSubmit()) {
     const playerId = interaction.fields.getTextInputValue('playerId');
