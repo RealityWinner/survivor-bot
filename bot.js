@@ -43,11 +43,11 @@ async function presentCaptcha(interaction, playerId) {
 
   let captchaId = genRes.data.data.captchaId;
   let imageRes = await axios.get(`https://mail.survivorio.com/api/v1/captcha/image/${captchaId}`, { responseType: 'arraybuffer' })
-  if (!imageRes || imageRes.status != 200 || !imageRes.data) {
+  if (!imageRes || imageRes.status != 200 || !imageRes.data || !imageRes.data.length) {
     if (interaction.replied) {
-      return await interaction.followUp({ content: 'Failed getting captcha image', ephemeral: true });
+      return await interaction.followUp({ content: 'Failed getting captcha image. Try again later.', ephemeral: true });
     } else {
-      return await interaction.editReply('Failed getting captcha image');
+      return await interaction.editReply('Failed getting captcha image. Try again later.');
     }
   }
 
@@ -73,7 +73,7 @@ async function presentCaptcha(interaction, playerId) {
 async function presentIdModal(interaction) {
   const modal = new ModalBuilder()
     .setCustomId('idModal')
-    .setTitle('Get Code');
+    .setTitle('Enter player id');
   const playerIdInput = new TextInputBuilder()
     .setCustomId('playerId')
     .setLabel("What is your survivor.io player id")
@@ -81,16 +81,20 @@ async function presentIdModal(interaction) {
   modal.addComponents(new ActionRowBuilder().addComponents(playerIdInput));
   try {
     await interaction.showModal(modal);
-  } catch (error) {}
+  } catch (error) {
+    print(error)
+  }
 }
 
 async function presentCaptchaModal(interaction) {
   const modal = new ModalBuilder()
     .setCustomId(interaction.customId)
-    .setTitle('Get Code');
+    .setTitle('Solve captcha');
   const captchaInput = new TextInputBuilder()
     .setCustomId('captcha')
     .setLabel("What is the captcha solution")
+    .setMinLength(4)
+    .setMaxLength(4)
     .setStyle(TextInputStyle.Short);
   modal.addComponents(new ActionRowBuilder().addComponents(captchaInput));
   try {
@@ -155,11 +159,12 @@ client.on('interactionCreate', async interaction => {
       if (interaction.options.getSubcommand() === 'user') {
         let user = interaction.options.getMember('target');
         db.all('SELECT * FROM players WHERE discordId=?', [user.id], (err, rows) => {
-          let msg = rows.map((row) => {
-            let claimDate = moment(row.date).unix();
+          let msg = ""
+          msg += rows.map((row) => {
+            let claimDate = moment(new Date(row.date)).unix();
             return `Discord: ${row.discordid} PlayerId: ${row.playerid} Code: ${row.code} RedeemedAt: <t:${claimDate}:f> <t:${claimDate}:R>`
           }).join('\n')
-          return interaction.reply({ content: msg || "None", ephemeral: true });
+          return interaction.reply({ content: msg, ephemeral: true });
         });
       }
       if (interaction.options.getSubcommand() === 'id') {
@@ -169,7 +174,7 @@ client.on('interactionCreate', async interaction => {
         }
         db.all('SELECT * FROM players WHERE playerId=?', [playerId], (err, rows) => {
           let msg = rows.map((row) => {
-            let claimDate = moment(row.date).unix();
+            let claimDate = moment(new Date(row.date)).unix();
             return `Discord: ${row.discordid} PlayerId: ${row.playerid} Code: ${row.code} RedeemedAt: <t:${claimDate}:f> <t:${claimDate}:R>`
           }).join('\n')
           return interaction.reply({ content: msg || "None", ephemeral: true });
@@ -192,7 +197,7 @@ client.on('interactionCreate', async interaction => {
       })
 
       if (row && row.date) {
-        let claimDate = moment(row.date).add(30, 'days');
+        let claimDate = moment(new Date(row.date)).add(30, 'days');
         if (interaction.member.premiumSinceTimestamp) {
           claimDate = claimDate.subtract(15, 'days');
         }
@@ -201,27 +206,23 @@ client.on('interactionCreate', async interaction => {
         }
       }
 
-      if (row && row.playerid) {
-        return await presentCaptcha(interaction, row.playerid);
-      } else {
+      // if (row && row.playerid) {
+      //   return await presentCaptcha(interaction, row.playerid);
+      // } else {
         return await presentIdModal(interaction);
-      }
+      // }
     }
 
 
     let parts = interaction.customId.split('-')
     if (parts[0] == 'captcha') {
-      await presentCaptchaModal(interaction)
-      return
+      return await presentCaptchaModal(interaction)
     }
-
-    // await interaction.message.edit({ content: '.', components: [], files: [] })
 
 
 
 
   } else if (interaction.isModalSubmit()) {
-    print('modal submit', interaction.customId)
     if (interaction.customId == 'idModal') {
       const playerId = interaction.fields.getTextInputValue('playerId');
       if (!/^\d+$/.test(playerId) || playerId <= 10000000) {
@@ -232,7 +233,6 @@ client.on('interactionCreate', async interaction => {
     }
 
     let [customId, playerId, captchaId] = interaction.customId.split('-')
-    print(customId, playerId, captchaId)
     if (customId == 'captcha') {
       const captcha = interaction.fields.getTextInputValue('captcha');
       if (!/^\d+$/.test(captcha) || captcha.length != 4) {
@@ -275,12 +275,22 @@ client.on('interactionCreate', async interaction => {
       switch (resp.data.code) {
         case 0: //Success!
           break;
+        case 20402: //Already claimed code
+        {
+          print(`Found potentially invalid code '${row.code}' or user has already claimed from batch`)
+          let channel = client.channels.cache.get(config.logChannel);
+          if (channel) {
+            channel.send({
+              content: `[FAIL] Potential bad code \`${row.code}\` or already claimed from batch - Discord: ${interaction.member} \`${interaction.user.id}\` PlayerId: \`${playerId}\` <@638290398665768961> <@213081486583136256>`
+            })
+          }
+          await interaction.followUp({ content: `Something went wrong... Please try again`, ephemeral: true });
+          return await presentCaptcha(interaction, playerId);
+        }
         case 20401: //Bad code
         case 20403: //Expired code
-        case 20402: //Already claimed code
         case 20404: //Redeem code is expired
         case 20409: //This redemption code has already been redeemed and can no longer be redeemed
-        break;
         {
           print(`Found invalid code '${row.code}'. Marking as used.`)
           let channel = client.channels.cache.get(config.logChannel);
