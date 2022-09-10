@@ -1,6 +1,6 @@
 {
-  "name": "embed_bot",
-  "version": "1.0.0",
+  "name": "survivor_bot",
+  "version": "2.0",
   "description": "",
   "keywords": [],
   "author": "Reformed",
@@ -14,8 +14,11 @@
     "start": "*.js"
   },
   "dependencies": {
+    "axios": "^0.27.2",
     "discord.js": "^14.3.0",
+    "dotenv": "^16.0.2",
     "moment": "^2.29.4",
+    "sharp": "^0.31.0",
     "sqlite3": "^5.0.11"
   },
   "devDependencies": {

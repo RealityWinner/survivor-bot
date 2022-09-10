@@ -1,3 +1,5 @@
+require('dotenv').config()
+
 function isDeveloper(uid) {
     switch (uid) {
         case '638290398665768961': //Reformed
@@ -11,7 +13,8 @@ function isDeveloper(uid) {
 
 module.exports = {
     isDeveloper: isDeveloper,
-    clientId: '1016712297214902333', //survivor dev bot
-    logChannel: '1016911305585737811', //survivor dev bot #logs
-    token: process.env.TOKEN || 'MTAxNjcxMjI5NzIxNDkwMjMzMw.GQxhz7.YrtrH5WIIeA19oZFgRzZEriMzun5A7nwC3I6Cw',
+    guildId: process.env.GUILD,
+    logChannel: process.env.LOG_CHANNEL,
+    clientId: process.env.CLIENT_ID,
+    token: process.env.TOKEN,
 };
