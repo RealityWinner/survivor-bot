@@ -199,9 +199,9 @@ client.on('interactionCreate', async interaction => {
 
       if (row && row.date) {
         let claimDate = moment(new Date(row.date)).add(30, 'days');
-        if (interaction.member.premiumSinceTimestamp) {
-          claimDate = claimDate.subtract(15, 'days');
-        }
+        // if (interaction.member.premiumSinceTimestamp) {
+        //   claimDate = claimDate.subtract(15, 'days');
+        // }
         if (moment() < claimDate && !config.isDeveloper(interaction.user.id)) {
           return await interaction.reply({ content: `You cannot claim another code until <t:${claimDate.unix()}:f> <t:${claimDate.unix()}:R>`, ephemeral: true });
         }
