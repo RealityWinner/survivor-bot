@@ -2,7 +2,7 @@ const { SlashCommandBuilder, Routes } = require('discord.js');
 const { REST } = require('@discordjs/rest');
 const { clientId, guildId, token } = require('./config.js');
 
-const commands = [
+let commands = [
     new SlashCommandBuilder()
         .setName('lookup')
         .setDescription('Looks up a playerid')
@@ -43,19 +43,16 @@ rest.put(Routes.applicationCommands(clientId), { body: commands })
     .then((data) => console.log(`Successfully registered ${data.length} application commands.`))
     .catch(console.error);
 
-if (guildId == '1016715396973334558') {
-    const commands = [
-        new SlashCommandBuilder()
-            .setName('captcha')
-            .setDescription('Test captcha flow')
-    ]
-    .map(command => command.toJSON());
 
-    rest.put(Routes.applicationGuildCommands(clientId, guildId), { body: commands })
-        .then((data) => console.log(`Successfully registered ${data.length} guild commands.`))
-        .catch(console.error);
-} else {
-    rest.put(Routes.applicationGuildCommands(clientId, guildId), { body: [] })
-        .then((data) => console.log(`Successfully registered ${data.length} guild commands.`))
-        .catch(console.error);
-}
+
+    
+commands = [
+    // new SlashCommandBuilder()
+    //     .setName('captcha')
+    //     .setDescription('Test captcha flow')
+]
+.map(command => command.toJSON());
+
+rest.put(Routes.applicationGuildCommands(clientId, guildId), { body: commands })
+    .then((data) => console.log(`Successfully registered ${data.length} guild commands.`))
+    .catch(console.error);

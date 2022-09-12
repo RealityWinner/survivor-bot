@@ -77,6 +77,7 @@ async function presentIdModal(interaction) {
   const playerIdInput = new TextInputBuilder()
     .setCustomId('playerId')
     .setLabel("What is your survivor.io player id")
+    .setMinLength(8)
     .setStyle(TextInputStyle.Short);
   modal.addComponents(new ActionRowBuilder().addComponents(playerIdInput));
   try {
@@ -226,7 +227,7 @@ client.on('interactionCreate', async interaction => {
     if (interaction.customId == 'idModal') {
       const playerId = interaction.fields.getTextInputValue('playerId');
       if (!/^\d+$/.test(playerId) || playerId <= 10000000) {
-        return interaction.reply({ content: `Invalid playerid \`${playerId}\`. You should enter only numbers.`, ephemeral: true });
+        return interaction.reply({ content: `Invalid playerid \`${playerId}\`. Please check again.`, ephemeral: true });
       }
 
       return await presentCaptcha(interaction, playerId);
@@ -281,10 +282,14 @@ client.on('interactionCreate', async interaction => {
           let channel = client.channels.cache.get(config.logChannel);
           if (channel) {
             channel.send({
-              content: `[FAIL] Potential bad code \`${row.code}\` or already claimed from batch - Discord: ${interaction.member} \`${interaction.user.id}\` PlayerId: \`${playerId}\` <@638290398665768961> <@213081486583136256>`
+              content: `[FAIL] Potential bad code \`${row.code}\` or already claimed from batch - Discord: ${interaction.member} \`${interaction.user.id}\` PlayerId: \`${playerId}\``// <@638290398665768961> <@213081486583136256>`
             })
           }
-          await interaction.followUp({ content: `Something went wrong... Please try again`, ephemeral: true });
+          if (interaction.deferred || interaction.replied) {
+            await interaction.followUp({ content: `Something went wrong... Have you already received a reward this month?`, ephemeral: true });
+          } else {
+            await interaction.reply({ content: `Something went wrong... Have you already received a reward this month?`, ephemeral: true });
+          }
           return await presentCaptcha(interaction, playerId);
         }
         case 20401: //Bad code
@@ -296,7 +301,7 @@ client.on('interactionCreate', async interaction => {
           let channel = client.channels.cache.get(config.logChannel);
           if (channel) {
             channel.send({
-              content: `[FAIL] Invalid code \`${row.code}\` ${resp.data.code} <@638290398665768961> <@213081486583136256>`,
+              content: `[FAIL] Invalid code \`${row.code}\` ${resp.data.code}`,// <@638290398665768961> <@213081486583136256>`,
             })
           }
           db.run("UPDATE codes SET used=TRUE WHERE code = ?", [row.code], () => {});
