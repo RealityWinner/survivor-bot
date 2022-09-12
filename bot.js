@@ -164,12 +164,11 @@ client.on('interactionCreate', async interaction => {
       if (interaction.options.getSubcommand() === 'user') {
         let user = interaction.options.getMember('target');
         db.all('SELECT * FROM players WHERE discordId=?', [user.id], (err, rows) => {
-          let msg = ""
-          msg += rows.map((row) => {
+          let msg = rows.map((row) => {
             let claimDate = moment(new Date(row.date)).unix();
             return `Discord: ${row.discordid} PlayerId: ${row.playerid} Code: ${row.code} RedeemedAt: <t:${claimDate}:f> <t:${claimDate}:R>`
           }).join('\n')
-          return interaction.reply({ content: msg, ephemeral: true });
+          return interaction.reply({ content: msg || "None", ephemeral: true });
         });
       }
       if (interaction.options.getSubcommand() === 'id') {
@@ -282,11 +281,12 @@ client.on('interactionCreate', async interaction => {
           break;
         case 20402: //Already claimed code
         {
-          print(`Found potentially invalid code '${row.code}' or user has already claimed from batch`)
+          print(`User has already claimed from batch '${row.code}' or very unlikely bad code`)
           let channel = client.channels.cache.get(config.logChannel);
           if (channel) {
             channel.send({
-              content: `[FAIL] Potential bad code \`${row.code}\` or already claimed from batch - Discord: ${interaction.member} \`${interaction.user.id}\` PlayerId: \`${playerId}\``// <@638290398665768961> <@213081486583136256>`
+              content: `[FAIL] Discord: ${interaction.member} \`${interaction.user.id}\` PlayerId: \`${playerId}\` - already claimed this batch?`// <@638290398665768961> <@213081486583136256>`
+              // Potential bad code \`${row.code}\` or already claimed from batch -
             })
           }
           if (interaction.deferred || interaction.replied) {
@@ -305,7 +305,7 @@ client.on('interactionCreate', async interaction => {
           let channel = client.channels.cache.get(config.logChannel);
           if (channel) {
             channel.send({
-              content: `[FAIL] Invalid code \`${row.code}\` ${resp.data.code}`,// <@638290398665768961> <@213081486583136256>`,
+              content: `[FAIL] Invalid code \`${row.code}\` ${resp.data.code} <@638290398665768961> <@213081486583136256>`,
             })
           }
           db.run("UPDATE codes SET used=TRUE WHERE code = ?", [row.code], () => {});
