@@ -262,7 +262,7 @@ client.on('interactionCreate', async interaction => {
         captchaId: captchaId,
         captcha: captcha,
       })
-      print(resp.status, resp.data)
+      // print(resp.status, resp.data)
 
 
 // 0 === e ? this.newArr[0][20] //Congratulations! Your rewards have been sent to your in-game Mailbox. Go and check it out!
@@ -335,7 +335,7 @@ client.on('interactionCreate', async interaction => {
       db.run("UPDATE codes SET used=TRUE WHERE code = ?", [row.code], () => {});
       db.run(`INSERT INTO players(discordid, playerid, code, date) VALUES(?, ?, ?, ?)`, [interaction.user.id, playerId, row.code, moment()], () => {});
 
-      print(`Redeem success Discord: ${interaction.member.name} \`${interaction.user.id}\` PlayerId: \`${playerId}\` Code: \`${row.code}\``)
+      print(`Redeem success Discord: ${interaction.member.displayName} \`${interaction.user.id}\` PlayerId: \`${playerId}\` Code: \`${row.code}\``)
       let channel = client.channels.cache.get(config.logChannel);
       if (channel) {
         channel.send({
