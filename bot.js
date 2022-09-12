@@ -321,8 +321,12 @@ client.on('interactionCreate', async interaction => {
               content: `[FAIL] Bad player id entered - Discord: ${interaction.member} \`${interaction.user.id}\` PlayerId: \`${playerId}\``,
             })
           }
+          if (interaction.deferred || interaction.replied) {
+            await interaction.followUp({ content: `Invalid playerid entered, try again`, ephemeral: true });
+          } else {
+            await interaction.reply({ content: `Invalid playerid entered, try again`, ephemeral: true });
+          }
         }
-          return await interaction.followUp({ content: `Invalid playerid entered, try again`, ephemeral: true });
         default:
           return print("Unknown unhandled error code!", resp.data)
       }
