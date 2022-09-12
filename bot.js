@@ -256,7 +256,7 @@ client.on('interactionCreate', async interaction => {
       }
 
 
-      interaction.update({ content: `Checking captcha...`, components: [], files: [] })
+      await interaction.update({ content: `Checking captcha...`, components: [], files: [] })
       let resp = await axios.post('https://mail.survivorio.com/api/v1/giftcode/claim', {
         userId: playerId,
         giftCode: row.code,
