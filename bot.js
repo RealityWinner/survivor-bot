@@ -83,6 +83,16 @@ async function presentIdModal(interaction) {
     .setLabel("What is your survivor.io player id")
     .setMinLength(8)
     .setStyle(TextInputStyle.Short);
+  
+  let row = await new Promise((resolve, reject) => {
+    db.get('SELECT * FROM players WHERE discordId=? ORDER BY date DESC LIMIT 1', [interaction.user.id], (err, row) => {
+      if (err) { reject(err) } else { resolve(row) }
+    })
+  })
+  if (row && row.playerid) {
+    playerIdInput.setValue(row.playerid)
+  }
+  
   modal.addComponents(new ActionRowBuilder().addComponents(playerIdInput));
   try {
     await interaction.showModal(modal);
@@ -189,32 +199,7 @@ client.on('interactionCreate', async interaction => {
   
   } else if (interaction.isButton()) {
     if (interaction.customId == 'getCode') {
-      let checkDate = moment(interaction.user.createdAt).add(1, 'months');
-      if (moment() < checkDate) {
-        return interaction.reply({ content: `Sorry. Your discord account is not eligieble to claim a gift-code until <t:${checkDate.unix()}:f> <t:${checkDate.unix()}:R>`, ephemeral: true });
-      }
-
-      let row = await new Promise((resolve, reject) => {
-        db.get('SELECT * FROM players WHERE discordId=? ORDER BY date DESC LIMIT 1', [interaction.user.id], (err, row) => {
-          if (err) { reject(err) } else { resolve(row) }
-        })
-      })
-
-      if (row && row.date) {
-        let claimDate = moment(new Date(row.date)).add(30, 'days');
-        if (interaction.member.premiumSinceTimestamp) {
-          claimDate = claimDate.subtract(15, 'days');
-        }
-        if (moment() < claimDate && !config.isDeveloper(interaction.user.id)) {
-          return await interaction.reply({ content: `You cannot claim another code until <t:${claimDate.unix()}:f> <t:${claimDate.unix()}:R>`, ephemeral: true });
-        }
-      }
-
-      // if (row && row.playerid) {
-      //   return await presentCaptcha(interaction, row.playerid);
-      // } else {
-        return await presentIdModal(interaction);
-      // }
+      return await presentIdModal(interaction);
     }
 
 
@@ -231,6 +216,23 @@ client.on('interactionCreate', async interaction => {
       const playerId = interaction.fields.getTextInputValue('playerId');
       if (!/^\d+$/.test(playerId) || playerId <= 10000000) {
         return interaction.reply({ content: `Invalid playerid \`${playerId}\`. Please check again.`, ephemeral: true });
+      }
+
+
+      let row = await new Promise((resolve, reject) => {
+        db.get('SELECT * FROM players WHERE discordId=? OR playerId=? ORDER BY date DESC LIMIT 1', [interaction.user.id, playerId], (err, row) => {
+          if (err) { reject(err) } else { resolve(row) }
+        })
+      })
+
+      if (row && row.date) {
+        let claimDate = moment(new Date(row.date)).add(30, 'days');
+        if (interaction.member.premiumSinceTimestamp) {
+          claimDate = claimDate.subtract(15, 'days');
+        }
+        if (moment() < claimDate && !config.isDeveloper(interaction.user.id)) {
+          return await interaction.reply({ content: `You cannot claim another code until <t:${claimDate.unix()}:f> <t:${claimDate.unix()}:R>`, ephemeral: true });
+        }
       }
 
       return await presentCaptcha(interaction, playerId);
@@ -281,12 +283,11 @@ client.on('interactionCreate', async interaction => {
           break;
         case 20402: //Already claimed code
         {
-          print(`User has already claimed from batch '${row.code}' or very unlikely bad code`)
+          print(`User has already claimed '${row.code}' or very unlikely bad code`)
           let channel = client.channels.cache.get(config.logChannel);
           if (channel) {
             channel.send({
-              content: `[FAIL] Discord: ${interaction.member} \`${interaction.user.id}\` PlayerId: \`${playerId}\` - already claimed this batch?`// <@638290398665768961> <@213081486583136256>`
-              // Potential bad code \`${row.code}\` or already claimed from batch -
+              content: `[FAIL] Discord: ${interaction.member} \`${interaction.user.id}\` PlayerId: \`${playerId}\` - already claimed this month?`// <@638290398665768961> <@213081486583136256>`
             })
           }
           if (interaction.deferred || interaction.replied) {
@@ -305,7 +306,7 @@ client.on('interactionCreate', async interaction => {
           let channel = client.channels.cache.get(config.logChannel);
           if (channel) {
             channel.send({
-              content: `[FAIL] Invalid code \`${row.code}\` ${resp.data.code} <@638290398665768961> <@213081486583136256>`,
+              content: `[FAIL] Invalid(used/expired?) code \`${row.code}\` ${resp.data.code} <@638290398665768961> <@213081486583136256>`,
             })
           }
           db.run("UPDATE codes SET used=TRUE WHERE code = ?", [row.code], () => {});
@@ -347,6 +348,15 @@ client.on('interactionCreate', async interaction => {
       return 
     }
   }
+});
+
+process.on('uncaughtException', function (err){
+  try {
+    let reformed = client.users.createDM('638290398665768961');
+    if (reformed) {
+      reformed.send(`[ERROR] ${err.message}\n${err.stack}`)
+    }
+  } catch (error) {}
 });
 
 if (config.token) {
