@@ -12,14 +12,16 @@ db.serialize(() => {
   db.run("CREATE TABLE IF NOT EXISTS codes (code TEXT NOT NULL UNIQUE, used BOOL DEFAULT FALSE)");
   db.run("CREATE TABLE IF NOT EXISTS players (discordid TEXT NOT NULL, playerid TEXT NOT NULL, code TEXT NOT NULL, date DATETIME DEFAULT CURRENT_TIMESTAMP)");
 
-  const fs = require('fs');
-  const allFileContents = fs.readFileSync('codes.txt', 'utf-8');
-  allFileContents.split(/\r?\n/).forEach(line =>  {
-    line = line.trim()
-    if (line.length) {
-      db.run("INSERT INTO codes(code) VALUES(?)", [line], () => {});
-    }
-  });
+  try {
+    const fs = require('fs');
+    const allFileContents = fs.readFileSync('codes.txt', 'utf-8');
+    allFileContents.split(/\r?\n/).forEach(line =>  {
+      line = line.trim()
+      if (line.length) {
+        db.run("INSERT INTO codes(code) VALUES(?)", [line], () => {});
+      }
+    });
+  } catch (error) {}
 });
 
 

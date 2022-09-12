@@ -2,5 +2,5 @@ node_modules/
 *.lock
 
 database.sqlite
+codes.txt
 .env
-
