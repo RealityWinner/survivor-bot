@@ -262,7 +262,7 @@ client.on('interactionCreate', async interaction => {
         captchaId: captchaId,
         captcha: captcha,
       })
-      // print(resp.status, resp.data)
+      print(resp.status, resp.data)
 
 
 // 0 === e ? this.newArr[0][20] //Congratulations! Your rewards have been sent to your in-game Mailbox. Go and check it out!
