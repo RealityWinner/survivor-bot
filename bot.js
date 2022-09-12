@@ -290,11 +290,11 @@ client.on('interactionCreate', async interaction => {
             })
           }
           if (interaction.deferred || interaction.replied) {
-            await interaction.followUp({ content: `Something went wrong... Have you already received a reward this month?`, ephemeral: true });
+            return await interaction.followUp({ content: `Something went wrong... Have you already received a reward this month?`, ephemeral: true });
           } else {
-            await interaction.reply({ content: `Something went wrong... Have you already received a reward this month?`, ephemeral: true });
+            return await interaction.reply({ content: `Something went wrong... Have you already received a reward this month?`, ephemeral: true });
           }
-          return await presentCaptcha(interaction, playerId);
+          // return await presentCaptcha(interaction, playerId);
         }
         case 20401: //Bad code
         case 20403: //Expired code
