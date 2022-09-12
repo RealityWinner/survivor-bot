@@ -32,7 +32,9 @@ function wait(ms) {
 
 async function presentCaptcha(interaction, playerId) {
   if (!interaction.deferred && !interaction.replied) {
-    await interaction.deferReply({ ephemeral: true });
+    try {
+      await interaction.deferReply({ ephemeral: true });
+    } catch (error) {}
   }
 
   let genRes = await axios.post('https://mail.survivorio.com/api/v1/captcha/generate')
