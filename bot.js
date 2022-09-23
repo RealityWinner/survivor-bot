@@ -33,7 +33,7 @@ function wait(ms) {
 async function presentCaptcha(interaction, playerId) {
   if (!interaction.deferred && !interaction.replied) {
     try {
-      await interaction.deferReply({ ephemeral: true });
+      await interaction.reply({ content: 'Fetching captcha...', ephemeral: true });
     } catch (error) {}
   }
 
@@ -48,11 +48,7 @@ async function presentCaptcha(interaction, playerId) {
   let captchaId = genRes.data.data.captchaId;
   let imageRes = await axios.get(`https://mail.survivorio.com/api/v1/captcha/image/${captchaId}`, { responseType: 'arraybuffer' }).catch(() => {});
   if (!imageRes || imageRes.status != 200 || !imageRes.data || !imageRes.data.length) {
-    if (interaction.replied) {
-      return await interaction.followUp({ content: 'Failed getting captcha image. Try again later.', ephemeral: true });
-    } else {
-      return await interaction.editReply('Failed getting captcha image. Try again later.');
-    }
+    return await interaction.editReply('Failed getting captcha image. Try again later.');
   }
 
   let data = await sharp(imageRes.data).flatten({ background: { r: 255, g: 255, b: 255 } }).toFormat('png').toBuffer()
@@ -65,11 +61,7 @@ async function presentCaptcha(interaction, playerId) {
         .setLabel('Enter captcha code')
         .setStyle(ButtonStyle.Primary),
     );
-  if (interaction.replied) {
-    return await interaction.followUp({ content: 'Invalid captcha, try again', files: [captcha], components: [enterButton], ephemeral: true });
-  } else {
-    return await interaction.editReply({ content: 'Please enter the captcha below', files: [captcha], components: [enterButton] });
-  }
+  return await interaction.editReply({ content: 'Please enter the captcha below', files: [captcha], components: [enterButton] });
 }
 
 
@@ -230,7 +222,7 @@ client.on('interactionCreate', async interaction => {
   } else if (interaction.isModalSubmit()) {
     if (interaction.customId == 'idModal') {
       const playerId = interaction.fields.getTextInputValue('playerId');
-      if (!/^\d+$/.test(playerId) || playerId <= 10000000) {
+      if (!/^\d+$/.test(playerId)) {
         return await interaction.reply({ content: `Invalid playerid \`${playerId}\`. Please check again.`, ephemeral: true });
       }
 
@@ -280,11 +272,7 @@ client.on('interactionCreate', async interaction => {
         captcha: captcha,
       }).catch(() => {});
       if (!resp || !resp.data) {
-        if (interaction.deferred || interaction.replied) {
-          return await interaction.followUp({ content: `A problem occured when trying to claim your gift-code. Please try again.`, ephemeral: true });
-        } else {
-          return await interaction.reply({ content: `A problem occured when trying to claim your gift-code. Please try again.`, ephemeral: true });
-        }
+        return await interaction.editReply({ content: `A problem occured when trying to redeem your gift-code. Please try again later.`, ephemeral: true });
       }
       print(resp.status, resp.data)
 
@@ -312,11 +300,7 @@ client.on('interactionCreate', async interaction => {
               content: `[FAIL] Discord: ${interaction.member} \`${interaction.user.id}\` PlayerId: \`${playerId}\` - already claimed this month?`// <@638290398665768961> <@213081486583136256>`
             })
           }
-          if (interaction.deferred || interaction.replied) {
-            return await interaction.followUp({ content: `Something went wrong... Have you already received a reward this month?`, ephemeral: true });
-          } else {
-            return await interaction.reply({ content: `Something went wrong... Have you already received a reward this month?`, ephemeral: true });
-          }
+          return await interaction.editReply({ content: `Something went wrong... Have you already received a reward this month?`, ephemeral: true });
           // return await presentCaptcha(interaction, playerId);
         }
         case 20401: //Bad code
@@ -344,11 +328,7 @@ client.on('interactionCreate', async interaction => {
               content: `[FAIL] Bad player id entered - Discord: ${interaction.member} \`${interaction.user.id}\` PlayerId: \`${playerId}\``,
             })
           }
-          if (interaction.deferred || interaction.replied) {
-            await interaction.followUp({ content: `Invalid playerid entered, try again`, ephemeral: true });
-          } else {
-            await interaction.reply({ content: `Invalid playerid entered, try again`, ephemeral: true });
-          }
+          return await interaction.editReply({ content: `Invalid playerid entered, try again`, ephemeral: true });
         }
         default:
           return print("Unknown unhandled error code!", resp.data)
@@ -366,7 +346,7 @@ client.on('interactionCreate', async interaction => {
         })
       }
 
-      return await interaction.followUp({ content: `Congratulations! Your rewards have been sent to your in-game Mailbox. Go and check it out!`, ephemeral: true });
+      return await interaction.editReply({ content: `Congratulations! Your rewards have been sent to your in-game Mailbox. Go and check it out!`, ephemeral: true });
     }
   }
 });
