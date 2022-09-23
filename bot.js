@@ -37,7 +37,7 @@ async function presentCaptcha(interaction, playerId) {
     } catch (error) {}
   }
 
-  let genRes = await axios.post('https://mail.survivorio.com/api/v1/captcha/generate')
+  let genRes = await axios.post('https://mail.survivorio.com/api/v1/captcha/generate').catch(() => {});
   if (!genRes || genRes.status != 200 || !genRes.data) {
     return await interaction.editReply('Failed getting captcha id');
   }
@@ -46,7 +46,7 @@ async function presentCaptcha(interaction, playerId) {
   }
 
   let captchaId = genRes.data.data.captchaId;
-  let imageRes = await axios.get(`https://mail.survivorio.com/api/v1/captcha/image/${captchaId}`, { responseType: 'arraybuffer' })
+  let imageRes = await axios.get(`https://mail.survivorio.com/api/v1/captcha/image/${captchaId}`, { responseType: 'arraybuffer' }).catch(() => {});
   if (!imageRes || imageRes.status != 200 || !imageRes.data || !imageRes.data.length) {
     if (interaction.replied) {
       return await interaction.followUp({ content: 'Failed getting captcha image. Try again later.', ephemeral: true });
@@ -141,12 +141,12 @@ client.on("ready", () => {
 client.on('interactionCreate', async interaction => {
 	if (interaction.isChatInputCommand()) {
     if (!config.isDeveloper(interaction.user.id) && !interaction.member.permissions.has(PermissionsBitField.Flags.Administrator)) {
-      return interaction.reply({ content: `Sorry only admins :(`, ephemeral: true });
+      return await interaction.reply({ content: `Sorry only admins :(`, ephemeral: true });
     }
 
 
     if (interaction.commandName === 'captcha') {
-      return presentCaptcha(interaction, 11111111)
+      return await presentCaptcha(interaction, 11111111)
     }
     
 
@@ -166,7 +166,7 @@ client.on('interactionCreate', async interaction => {
         ]
       })
 
-      return interaction.reply({ content: `Posted!`, ephemeral: true });
+      return await interaction.reply({ content: `Posted!`, ephemeral: true });
     }
 
 
@@ -178,20 +178,20 @@ client.on('interactionCreate', async interaction => {
             let claimDate = moment(new Date(row.date)).unix();
             return `Discord: ${row.discordid} PlayerId: ${row.playerid} Code: ${row.code} RedeemedAt: <t:${claimDate}:f> <t:${claimDate}:R>`
           }).join('\n')
-          return interaction.reply({ content: msg || "None", ephemeral: true });
+          return await interaction.reply({ content: msg || "None", ephemeral: true });
         });
       }
       if (interaction.options.getSubcommand() === 'id') {
         let playerId = interaction.options.getString('target');
         if (!/^\d+$/.test(playerId)) {
-          return interaction.reply({ content: `Invalid playerid \`${playerId}\``, ephemeral: true });
+          return await interaction.reply({ content: `Invalid playerid \`${playerId}\``, ephemeral: true });
         }
-        db.all('SELECT * FROM players WHERE playerId=?', [playerId], (err, rows) => {
+        db.all('SELECT * FROM players WHERE playerId=?', [playerId], async (err, rows) => {
           let msg = rows.map((row) => {
             let claimDate = moment(new Date(row.date)).unix();
             return `Discord: ${row.discordid} PlayerId: ${row.playerid} Code: ${row.code} RedeemedAt: <t:${claimDate}:f> <t:${claimDate}:R>`
           }).join('\n')
-          return interaction.reply({ content: msg || "None", ephemeral: true });
+          return await interaction.reply({ content: msg || "None", ephemeral: true });
         });
       }
     }
@@ -215,7 +215,7 @@ client.on('interactionCreate', async interaction => {
     if (interaction.customId == 'idModal') {
       const playerId = interaction.fields.getTextInputValue('playerId');
       if (!/^\d+$/.test(playerId) || playerId <= 10000000) {
-        return interaction.reply({ content: `Invalid playerid \`${playerId}\`. Please check again.`, ephemeral: true });
+        return await interaction.reply({ content: `Invalid playerid \`${playerId}\`. Please check again.`, ephemeral: true });
       }
 
 
@@ -243,8 +243,7 @@ client.on('interactionCreate', async interaction => {
       const captcha = interaction.fields.getTextInputValue('captcha');
       if (!/^\d+$/.test(captcha) || captcha.length != 4) {
         await interaction.update({ content: `Invalid captcha, try again`, components: [], files: [] });
-        await presentCaptcha(interaction, playerId)
-        return
+        return await presentCaptcha(interaction, playerId)
       }
 
       let row = await new Promise((resolve, reject) => {
@@ -263,7 +262,14 @@ client.on('interactionCreate', async interaction => {
         giftCode: row.code,
         captchaId: captchaId,
         captcha: captcha,
-      })
+      }).catch(() => {});
+      if (!resp || !resp.data) {
+        if (interaction.deferred || interaction.replied) {
+          return await interaction.followUp({ content: `A problem occured when trying to claim your gift-code. Please try again.`, ephemeral: true });
+        } else {
+          return await interaction.reply({ content: `A problem occured when trying to claim your gift-code. Please try again.`, ephemeral: true });
+        }
+      }
       print(resp.status, resp.data)
 
 
@@ -344,8 +350,7 @@ client.on('interactionCreate', async interaction => {
         })
       }
 
-      interaction.followUp({ content: `Congratulations! Your rewards have been sent to your in-game Mailbox. Go and check it out!`, ephemeral: true });
-      return 
+      return await interaction.followUp({ content: `Congratulations! Your rewards have been sent to your in-game Mailbox. Go and check it out!`, ephemeral: true });
     }
   }
 });
