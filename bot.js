@@ -97,7 +97,7 @@ async function presentIdModal(interaction) {
   try {
     await interaction.showModal(modal);
   } catch (error) {
-    print(error)
+    print("Discord interaction error attempting to show playerId modal :(")
   }
 }
 
@@ -115,7 +115,7 @@ async function presentCaptchaModal(interaction) {
   try {
     await interaction.showModal(modal);
   } catch (error) {
-    print(error)
+    print("Discord interaction error attempting to show captcha modal :(")
   }
 }
 
