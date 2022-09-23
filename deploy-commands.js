@@ -35,6 +35,10 @@ let commands = [
                 .setDescription('The body of the message to send')
                 .setRequired(true))
         .setDMPermission(false),
+    new SlashCommandBuilder()
+        .setName('code')
+        .setDescription('Get code')
+        .setDMPermission(false),
 ]
 .map(command => command.toJSON());
 

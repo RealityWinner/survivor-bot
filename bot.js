@@ -169,11 +169,27 @@ client.on('interactionCreate', async interaction => {
       return await interaction.reply({ content: `Posted!`, ephemeral: true });
     }
 
+    if (interaction.commandName === 'code') {
+      await interaction.reply({ content: `Fetching a code. Hold on one moment.`, ephemeral: false });
+
+      let row = await new Promise((resolve, reject) => {
+        db.get('SELECT * FROM codes WHERE used=FALSE ORDER BY RANDOM() LIMIT 1', [], (err, row) => {
+          if (err) { reject(err) } else { resolve(row) }
+        })
+      })
+      if (!row || !row.code) {
+        return await interaction.editReply({ content: `Sorry there are no more codes available!`, components: [], files: [] });
+      }
+
+      db.run("UPDATE codes SET used=TRUE WHERE code = ?", [row.code], () => {});
+      return await interaction.editReply({ content: `Your code is \`${row.code}\`!`, components: [], files: [] });
+    }
+
 
     if (interaction.commandName === 'lookup') {
       if (interaction.options.getSubcommand() === 'user') {
         let user = interaction.options.getMember('target');
-        db.all('SELECT * FROM players WHERE discordId=?', [user.id], (err, rows) => {
+        db.all('SELECT * FROM players WHERE discordId=?', [user.id], async (err, rows) => {
           let msg = rows.map((row) => {
             let claimDate = moment(new Date(row.date)).unix();
             return `Discord: ${row.discordid} PlayerId: ${row.playerid} Code: ${row.code} RedeemedAt: <t:${claimDate}:f> <t:${claimDate}:R>`
