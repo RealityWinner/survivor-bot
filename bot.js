@@ -31,24 +31,24 @@ function wait(ms) {
 }
 
 async function presentCaptcha(interaction, playerId) {
-  if (!interaction.deferred && !interaction.replied) {
-    try {
-      await interaction.reply({ content: 'Fetching captcha...', ephemeral: true });
-    } catch (error) {}
-  }
+  // if (!interaction.deferred && !interaction.replied) {
+  //   try {
+  //     await interaction.reply({ content: 'Fetching captcha...', ephemeral: true });
+  //   } catch (error) {}
+  // }
 
   let genRes = await axios.post('https://mail.survivorio.com/api/v1/captcha/generate').catch(() => {});
   if (!genRes || genRes.status != 200 || !genRes.data) {
-    return await interaction.editReply('Failed getting captcha id');
+    return await interaction.editReply({ content: 'Failed getting captcha id' });
   }
   if (genRes.data.code != 0 || !genRes.data.data || !genRes.data.data.captchaId) {
-    return await interaction.editReply('Failed getting captcha id');
+    return await interaction.editReply({ content: 'Failed getting captcha id' });
   }
 
   let captchaId = genRes.data.data.captchaId;
   let imageRes = await axios.get(`https://mail.survivorio.com/api/v1/captcha/image/${captchaId}`, { responseType: 'arraybuffer' }).catch(() => {});
   if (!imageRes || imageRes.status != 200 || !imageRes.data || !imageRes.data.length) {
-    return await interaction.editReply('Failed getting captcha image. Try again later.');
+    return await interaction.editReply({ content: 'Failed getting captcha image. Try again later.' });
   }
 
   let data = await sharp(imageRes.data).flatten({ background: { r: 255, g: 255, b: 255 } }).toFormat('png').toBuffer()
@@ -134,11 +134,6 @@ client.on('interactionCreate', async interaction => {
 	if (interaction.isChatInputCommand()) {
     if (!config.isDeveloper(interaction.user.id) && !interaction.member.permissions.has(PermissionsBitField.Flags.Administrator)) {
       return await interaction.reply({ content: `Sorry only admins :(`, ephemeral: true });
-    }
-
-
-    if (interaction.commandName === 'captcha') {
-      return await presentCaptcha(interaction, 11111111)
     }
     
 
@@ -243,6 +238,7 @@ client.on('interactionCreate', async interaction => {
         }
       }
 
+      await interaction.reply({ content: 'Fetching captcha...', ephemeral: true });
       return await presentCaptcha(interaction, playerId);
     }
 
