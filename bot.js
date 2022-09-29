@@ -39,10 +39,10 @@ async function presentCaptcha(interaction, playerId) {
 
   let genRes = await axios.post('https://mail.survivorio.com/api/v1/captcha/generate').catch(() => {});
   if (!genRes || genRes.status != 200 || !genRes.data) {
-    return await interaction.editReply({ content: 'Failed getting captcha id' });
+    return await interaction.editReply({ content: 'Failed getting captcha. Try again later.' });
   }
   if (genRes.data.code != 0 || !genRes.data.data || !genRes.data.data.captchaId) {
-    return await interaction.editReply({ content: 'Failed getting captcha id' });
+    return await interaction.editReply({ content: 'Failed getting captcha. Try again later.' });
   }
 
   let captchaId = genRes.data.data.captchaId;
