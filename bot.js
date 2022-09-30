@@ -4,7 +4,7 @@ const { Client, GatewayIntentBits, ActionRowBuilder, ButtonBuilder, ButtonStyle,
 const config = require('./config.js')
 const moment = require('moment')
 const axios = require('axios')
-const sharp = require('sharp')
+const sharp = require('sharp');
 
 const sqlite3 = require('sqlite3').verbose();
 const db = new sqlite3.Database('database.sqlite');
@@ -229,12 +229,9 @@ client.on('interactionCreate', async interaction => {
       })
 
       if (row && row.date) {
-        let claimDate = moment(new Date(row.date)).add(30, 'days');
-        if (interaction.member.premiumSinceTimestamp) {
-          claimDate = claimDate.subtract(15, 'days');
-        }
-        if (moment() < claimDate && !config.isDeveloper(interaction.user.id)) {
-          return await interaction.reply({ content: `You cannot claim another code until <t:${claimDate.unix()}:f> <t:${claimDate.unix()}:R>`, ephemeral: true });
+        let prevClaim = moment(new Date(row.date)).utc();
+        if (prevClaim.month() == moment.utc().month() && !config.isDeveloper(interaction.user.id)) {
+          return await interaction.reply({ content: `You cannot claim another code until next month.`, ephemeral: true });
         }
       }
 
