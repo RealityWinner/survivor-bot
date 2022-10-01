@@ -216,9 +216,11 @@ client.on('interactionCreate', async interaction => {
 
   } else if (interaction.isModalSubmit()) {
     if (interaction.customId == 'idModal') {
+      await interaction.reply({ content: `Checking...`, ephemeral: true });
+
       const playerId = interaction.fields.getTextInputValue('playerId');
       if (!/^\d+$/.test(playerId)) {
-        return await interaction.reply({ content: `Invalid playerid \`${playerId}\`. Please check again.`, ephemeral: true });
+        return await interaction.editReply({ content: `Invalid playerid \`${playerId}\`. Please check again.`, ephemeral: true });
       }
 
 
@@ -231,11 +233,11 @@ client.on('interactionCreate', async interaction => {
       if (row && row.date) {
         let prevClaim = moment(new Date(row.date)).utc();
         if (prevClaim.month() == moment.utc().month() && !config.isDeveloper(interaction.user.id)) {
-          return await interaction.reply({ content: `You cannot claim another code until next month.`, ephemeral: true });
+          return await interaction.editReply({ content: `You cannot claim another code until next month.`, ephemeral: true });
         }
       }
 
-      await interaction.reply({ content: 'Fetching captcha...', ephemeral: true });
+      await interaction.editReply({ content: 'Fetching captcha...', ephemeral: true });
       return await presentCaptcha(interaction, playerId);
     }
 
