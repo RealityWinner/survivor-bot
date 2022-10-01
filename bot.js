@@ -12,6 +12,14 @@ db.serialize(() => {
   db.run("CREATE TABLE IF NOT EXISTS codes (code TEXT NOT NULL UNIQUE, used BOOL DEFAULT FALSE)");
   db.run("CREATE TABLE IF NOT EXISTS players (discordid TEXT NOT NULL, playerid TEXT NOT NULL, code TEXT NOT NULL, date DATETIME DEFAULT CURRENT_TIMESTAMP)");
 
+  db.each("SELECT * FROM players", (err, row) => {
+    if (row && row.date && isNaN(row.date)) {
+      let newDate = moment(new Date(row.date)).unix() * 1000
+      // print(row.code, row.date, newDate)
+      db.run("UPDATE players SET date=? WHERE code=? AND date=?", [newDate, row.code, row.date], () => {});
+    }
+  });
+
   try {
     const fs = require('fs');
     const allFileContents = fs.readFileSync('codes.txt', 'utf-8');
@@ -176,7 +184,7 @@ client.on('interactionCreate', async interaction => {
     if (interaction.commandName === 'lookup') {
       if (interaction.options.getSubcommand() === 'user') {
         let user = interaction.options.getMember('target');
-        db.all('SELECT * FROM players WHERE discordId=?', [user.id], async (err, rows) => {
+        db.all('SELECT * FROM players WHERE discordId=? ORDER BY date DESC', [user.id], async (err, rows) => {
           let msg = rows.map((row) => {
             let claimDate = moment(new Date(row.date)).unix();
             return `Discord: ${row.discordid} PlayerId: ${row.playerid} Code: ${row.code} RedeemedAt: <t:${claimDate}:f> <t:${claimDate}:R>`
@@ -189,7 +197,7 @@ client.on('interactionCreate', async interaction => {
         if (!/^\d+$/.test(playerId)) {
           return await interaction.reply({ content: `Invalid playerid \`${playerId}\``, ephemeral: true });
         }
-        db.all('SELECT * FROM players WHERE playerId=?', [playerId], async (err, rows) => {
+        db.all('SELECT * FROM players WHERE playerId=? ORDER BY date DESC', [playerId], async (err, rows) => {
           let msg = rows.map((row) => {
             let claimDate = moment(new Date(row.date)).unix();
             return `Discord: ${row.discordid} PlayerId: ${row.playerid} Code: ${row.code} RedeemedAt: <t:${claimDate}:f> <t:${claimDate}:R>`
@@ -298,6 +306,7 @@ client.on('interactionCreate', async interaction => {
 // 20409 === e ? this.newArr[0][46]
 // 30001 === e ? this.newArr[0][39] //Server is busy, please try again.
 
+      // resp.data.code = 0
       switch (resp.data.code) {
         case 0: //Success!
           break;
@@ -346,7 +355,7 @@ client.on('interactionCreate', async interaction => {
 
 
       db.run("UPDATE codes SET used=TRUE WHERE code = ?", [row.code], () => {});
-      db.run(`INSERT INTO players(discordid, playerid, code, date) VALUES(?, ?, ?, ?)`, [interaction.user.id, playerId, row.code, moment()], () => {});
+      db.run(`INSERT INTO players(discordid, playerid, code, date) VALUES(?, ?, ?, ?)`, [interaction.user.id, playerId, row.code, moment().unix() * 1000], () => {});
 
       print(`Redeem success Discord: ${interaction.member.displayName} \`${interaction.user.id}\` PlayerId: \`${playerId}\` Code: \`${row.code}\``)
       let channel = client.channels.cache.get(config.logChannel);
