@@ -243,9 +243,11 @@ client.on('interactionCreate', async interaction => {
 
     let [customId, playerId, captchaId] = interaction.customId.split('-')
     if (customId == 'captcha') {
+      await interaction.update({ content: `Checking captcha...`, components: [], files: [] })
+
       const captcha = interaction.fields.getTextInputValue('captcha');
       if (!/^\d+$/.test(captcha) || captcha.length != 4) {
-        await interaction.update({ content: `Invalid captcha, try again`, components: [], files: [] });
+        await interaction.editReply({ content: `Invalid captcha, try again` });
         return await presentCaptcha(interaction, playerId)
       }
 
@@ -259,7 +261,7 @@ client.on('interactionCreate', async interaction => {
       if (row && row.date) {
         let prevClaim = moment(new Date(row.date)).utc();
         if (prevClaim.month() == moment.utc().month() && !config.isDeveloper(interaction.user.id)) {
-          return await interaction.update({ content: `You cannot claim another code until next month.`, components: [], files: [] });
+          return await interaction.editReply({ content: `You cannot claim another code until next month.` });
         }
       }
 
@@ -269,11 +271,9 @@ client.on('interactionCreate', async interaction => {
         })
       })
       if (!row || !row.code) {
-        return await interaction.update({ content: `Sorry there are no more codes available!`, components: [], files: [] });
+        return await interaction.editReply({ content: `Sorry there are no more codes available!` });
       }
 
-
-      await interaction.update({ content: `Checking captcha...`, components: [], files: [] })
       let resp = await axios.post('https://mail.survivorio.com/api/v1/giftcode/claim', {
         userId: playerId,
         giftCode: row.code,
@@ -281,7 +281,7 @@ client.on('interactionCreate', async interaction => {
         captcha: captcha,
       }).catch(() => {});
       if (!resp || !resp.data) {
-        return await interaction.editReply({ content: `A problem occured when trying to redeem your gift-code. Please try again later.`, ephemeral: true });
+        return await interaction.editReply({ content: `A problem occured when trying to redeem your gift-code. Please try again later.` });
       }
       print(resp.status, resp.data)
 
