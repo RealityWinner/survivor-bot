@@ -260,6 +260,7 @@ client.on('interactionCreate', async interaction => {
 
       if (row && row.date) {
         let prevClaim = moment(new Date(row.date)).utc();
+        print(prevClaim, moment.utc(), prevClaim.month(), moment.utc().month(), interaction.user.id)
         if (prevClaim.month() == moment.utc().month() && !config.isDeveloper(interaction.user.id)) {
           return await interaction.editReply({ content: `You cannot claim another code until next month.` });
         }
