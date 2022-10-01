@@ -249,7 +249,21 @@ client.on('interactionCreate', async interaction => {
         return await presentCaptcha(interaction, playerId)
       }
 
+      
       let row = await new Promise((resolve, reject) => {
+        db.get('SELECT * FROM players WHERE discordId=? OR playerId=? ORDER BY date DESC LIMIT 1', [interaction.user.id, playerId], (err, row) => {
+          if (err) { reject(err) } else { resolve(row) }
+        })
+      })
+
+      if (row && row.date) {
+        let prevClaim = moment(new Date(row.date)).utc();
+        if (prevClaim.month() == moment.utc().month() && !config.isDeveloper(interaction.user.id)) {
+          return await interaction.update({ content: `You cannot claim another code until next month.`, components: [], files: [] });
+        }
+      }
+
+      row = await new Promise((resolve, reject) => {
         db.get('SELECT * FROM codes WHERE used=FALSE ORDER BY RANDOM() LIMIT 1', [], (err, row) => {
           if (err) { reject(err) } else { resolve(row) }
         })
