@@ -12,13 +12,13 @@ db.serialize(() => {
   db.run("CREATE TABLE IF NOT EXISTS codes (code TEXT NOT NULL UNIQUE, used BOOL DEFAULT FALSE)");
   db.run("CREATE TABLE IF NOT EXISTS players (discordid TEXT NOT NULL, playerid TEXT NOT NULL, code TEXT NOT NULL, date DATETIME DEFAULT CURRENT_TIMESTAMP)");
 
-  db.each("SELECT * FROM players", (err, row) => {
-    if (row && row.date && isNaN(row.date)) {
-      let newDate = moment(new Date(row.date)).unix() * 1000
-      // print(row.code, row.date, newDate)
-      db.run("UPDATE players SET date=? WHERE code=? AND date=?", [newDate, row.code, row.date], () => {});
-    }
-  });
+  // db.each("SELECT * FROM players", (err, row) => {
+  //   if (row && row.date && isNaN(row.date)) {
+  //     let newDate = moment(new Date(row.date)).unix() * 1000
+  //     // print(row.code, row.date, newDate)
+  //     db.run("UPDATE players SET date=? WHERE code=? AND date=?", [newDate, row.code, row.date], () => {});
+  //   }
+  // });
 
   try {
     const fs = require('fs');
