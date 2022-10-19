@@ -3,4 +3,5 @@ node_modules/
 
 database.sqlite
 codes.txt
+nitro.txt
 .env

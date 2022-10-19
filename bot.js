@@ -5,11 +5,14 @@ const config = require('./config.js')
 const moment = require('moment')
 const axios = require('axios')
 const sharp = require('sharp');
+const { isDeveloper } = require('./config.js');
 
 const sqlite3 = require('sqlite3').verbose();
 const db = new sqlite3.Database('database.sqlite');
 db.serialize(() => {
   db.run("CREATE TABLE IF NOT EXISTS codes (code TEXT NOT NULL UNIQUE, used BOOL DEFAULT FALSE)");
+  db.run("CREATE TABLE IF NOT EXISTS nitro_codes (code TEXT NOT NULL UNIQUE, used BOOL DEFAULT FALSE)");
+  db.run("CREATE TABLE IF NOT EXISTS generic_codes (code TEXT NOT NULL UNIQUE, expired BOOL DEFAULT FALSE)");
   db.run("CREATE TABLE IF NOT EXISTS players (discordid TEXT NOT NULL, playerid TEXT NOT NULL, code TEXT NOT NULL, date DATETIME DEFAULT CURRENT_TIMESTAMP)");
 
   // db.each("SELECT * FROM players", (err, row) => {
@@ -22,11 +25,21 @@ db.serialize(() => {
 
   try {
     const fs = require('fs');
-    const allFileContents = fs.readFileSync('codes.txt', 'utf-8');
+
+    let allFileContents = fs.readFileSync('codes.txt', 'utf-8');
     allFileContents.split(/\r?\n/).forEach(line =>  {
       line = line.trim()
       if (line.length) {
         db.run("INSERT INTO codes(code) VALUES(?)", [line], () => {});
+      }
+    });
+
+
+    allFileContents = fs.readFileSync('nitro.txt', 'utf-8');
+    allFileContents.split(/\r?\n/).forEach(line =>  {
+      line = line.trim()
+      if (line.length) {
+        db.run("INSERT INTO nitro_codes(code) VALUES(?)", [line], () => {});
       }
     });
   } catch (error) {}
@@ -120,6 +133,36 @@ async function presentCaptchaModal(interaction) {
 }
 
 
+async function checkCanClaim(interaction, playerId) {
+  let row = await new Promise((resolve, reject) => {
+    db.get('SELECT * FROM players WHERE discordId=? OR playerId=? ORDER BY date DESC LIMIT 1', [interaction.user.id, playerId], (err, row) => {
+      if (err) { reject(err) } else { resolve(row) }
+    })
+  })
+
+  if (row && row.date) {
+    let prevClaim = moment(new Date(row.date)).utc();
+
+    let claimDate = prevClaim.clone().utc().add(16, 'days');
+    if (!interaction.member.premiumSinceTimestamp) {
+      claimDate.add(16, 'days');
+    }
+
+    // print(prevClaim, claimDate)
+    if (claimDate.month() > prevClaim.month()) {
+      claimDate.second(0).minute(0).hour(0).date(1).month(prevClaim.month()+1)
+      // print(claimDate)
+    }
+    if (claimDate > moment()
+      // && !config.isDeveloper(interaction.user.id)
+      ) {
+      await interaction.editReply({ content: `You cannot claim another code until <t:${claimDate.unix()}:f> <t:${claimDate.unix()}:R>`, ephemeral: true });
+      return false
+    }
+  }
+
+  return true
+}
 
 
 
@@ -139,6 +182,10 @@ client.on("ready", () => {
 });
 
 client.on('interactionCreate', async interaction => {
+  if (isDeveloper(interaction.user.id)) {
+    interaction.member.premiumSinceTimestamp = 1
+  }
+
 	if (interaction.isChatInputCommand()) {
     if (!config.isDeveloper(interaction.user.id) && !interaction.member.permissions.has(PermissionsBitField.Flags.Administrator)) {
       return await interaction.reply({ content: `Sorry only admins :(`, ephemeral: true });
@@ -232,18 +279,7 @@ client.on('interactionCreate', async interaction => {
       }
 
 
-      let row = await new Promise((resolve, reject) => {
-        db.get('SELECT * FROM players WHERE discordId=? OR playerId=? ORDER BY date DESC LIMIT 1', [interaction.user.id, playerId], (err, row) => {
-          if (err) { reject(err) } else { resolve(row) }
-        })
-      })
-
-      if (row && row.date) {
-        let prevClaim = moment(new Date(row.date)).utc();
-        if (prevClaim.month() == moment.utc().month() && !config.isDeveloper(interaction.user.id)) {
-          return await interaction.editReply({ content: `You cannot claim another code until next month.`, ephemeral: true });
-        }
-      }
+      if (!await checkCanClaim(interaction, playerId)) { return }
 
       await interaction.editReply({ content: 'Fetching captcha...', ephemeral: true });
       return await presentCaptcha(interaction, playerId);
@@ -259,23 +295,12 @@ client.on('interactionCreate', async interaction => {
         return await presentCaptcha(interaction, playerId)
       }
 
-      
+
+      if (!await checkCanClaim(interaction, playerId)) { return }
+
+      let table = (interaction.member.premiumSinceTimestamp && moment.utc().date() > 16) ? "nitro_codes" : "codes"
       let row = await new Promise((resolve, reject) => {
-        db.get('SELECT * FROM players WHERE discordId=? OR playerId=? ORDER BY date DESC LIMIT 1', [interaction.user.id, playerId], (err, row) => {
-          if (err) { reject(err) } else { resolve(row) }
-        })
-      })
-
-      if (row && row.date) {
-        let prevClaim = moment(new Date(row.date)).utc();
-        print(prevClaim, moment.utc(), prevClaim.month(), moment.utc().month(), interaction.user.id)
-        if (prevClaim.month() == moment.utc().month() && !config.isDeveloper(interaction.user.id)) {
-          return await interaction.editReply({ content: `You cannot claim another code until next month.` });
-        }
-      }
-
-      row = await new Promise((resolve, reject) => {
-        db.get('SELECT * FROM codes WHERE used=FALSE ORDER BY RANDOM() LIMIT 1', [], (err, row) => {
+        db.get(`SELECT * FROM ${table} WHERE used=FALSE ORDER BY RANDOM() LIMIT 1`, [], (err, row) => {
           if (err) { reject(err) } else { resolve(row) }
         })
       })
@@ -334,7 +359,7 @@ client.on('interactionCreate', async interaction => {
               content: `[FAIL] Invalid(used/expired?) code \`${row.code}\` ${resp.data.code} <@638290398665768961> <@213081486583136256>`,
             })
           }
-          db.run("UPDATE codes SET used=TRUE WHERE code = ?", [row.code], () => {});
+          db.run(`UPDATE ${table} SET used=TRUE WHERE code = ?`, [row.code], () => {});
         }
         case 30001: //Server is busy
         case 20002: //Invalid captcha
@@ -354,7 +379,7 @@ client.on('interactionCreate', async interaction => {
       }
 
 
-      db.run("UPDATE codes SET used=TRUE WHERE code = ?", [row.code], () => {});
+      db.run(`UPDATE ${table} SET used=TRUE WHERE code = ?`, [row.code], () => {});
       db.run(`INSERT INTO players(discordid, playerid, code, date) VALUES(?, ?, ?, ?)`, [interaction.user.id, playerId, row.code, moment().unix() * 1000], () => {});
 
       print(`Redeem success Discord: ${interaction.member.displayName} \`${interaction.user.id}\` PlayerId: \`${playerId}\` Code: \`${row.code}\``)
