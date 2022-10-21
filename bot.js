@@ -23,9 +23,8 @@ db.serialize(() => {
   //   }
   // });
 
+  const fs = require('fs');
   try {
-    const fs = require('fs');
-
     let allFileContents = fs.readFileSync('codes.txt', 'utf-8');
     allFileContents.split(/\r?\n/).forEach(line =>  {
       line = line.trim()
@@ -33,9 +32,11 @@ db.serialize(() => {
         db.run("INSERT INTO codes(code) VALUES(?)", [line], () => {});
       }
     });
+  } catch (error) {}
 
 
-    allFileContents = fs.readFileSync('nitro.txt', 'utf-8');
+  try {
+    let allFileContents = fs.readFileSync('nitro.txt', 'utf-8');
     allFileContents.split(/\r?\n/).forEach(line =>  {
       line = line.trim()
       if (line.length) {
