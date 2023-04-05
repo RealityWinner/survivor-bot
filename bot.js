@@ -358,7 +358,7 @@ client.on('interactionCreate', async interaction => {
           let channel = client.channels.cache.get(config.logChannel);
           if (channel) {
             channel.send({
-              content: `[FAIL] Invalid(used/expired?) code \`${row.code}\` ${resp.data.code} <@638290398665768961> <@213081486583136256>`,
+              content: `[FAIL] Invalid(used/expired?) code \`${row.code}\` ${resp.data.code}`,
             })
           }
           db.run(`UPDATE ${table} SET used=TRUE WHERE code = ?`, [row.code], () => {});
