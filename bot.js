@@ -179,7 +179,7 @@ const client = new Client({
 
 client.on("ready", () => {
   console.log(`Bot has started`); 
-  client.user.setActivity(`survivio.io`, {type: 'PLAYING'});
+  client.user.setActivity(`Survivor.io`, {type: 'PLAYING'});
 });
 
 client.on('interactionCreate', async interaction => {
@@ -203,7 +203,7 @@ client.on('interactionCreate', async interaction => {
           .addComponents(
             new ButtonBuilder()
               .setCustomId('getCode')
-              .setLabel('Get gift-code')
+              .setLabel('Get Monthly Gift')
               .setStyle(ButtonStyle.Primary),
           )
         ]
