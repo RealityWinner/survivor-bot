@@ -96,6 +96,7 @@ async function presentIdModal(interaction) {
     .setCustomId('playerId')
     .setLabel("What is your survivor.io player id")
     .setMinLength(8)
+    .setMaxLength(8)
     .setStyle(TextInputStyle.Short);
   
   let row = await new Promise((resolve, reject) => {
