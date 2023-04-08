@@ -1,6 +1,6 @@
 /* eslint-disable no-fallthrough */
 const print = console.log;
-const { Client, GatewayIntentBits, ActionRowBuilder, ButtonBuilder, ButtonStyle, ModalBuilder, TextInputBuilder, TextInputStyle, ButtonInteraction, PermissionsBitField, AttachmentBuilder, EmbedBuilder, SelectMenuBuilder } = require('discord.js');
+const { Client, GatewayIntentBits, ActionRowBuilder, ButtonBuilder, ButtonStyle, ModalBuilder, TextInputBuilder, TextInputStyle, PermissionsBitField, AttachmentBuilder } = require('discord.js');
 const config = require('./config.js')
 const moment = require('moment')
 const axios = require('axios')
@@ -14,14 +14,6 @@ db.serialize(() => {
   db.run("CREATE TABLE IF NOT EXISTS nitro_codes (code TEXT NOT NULL UNIQUE, used BOOL DEFAULT FALSE)");
   db.run("CREATE TABLE IF NOT EXISTS generic_codes (code TEXT NOT NULL UNIQUE, expired BOOL DEFAULT FALSE)");
   db.run("CREATE TABLE IF NOT EXISTS players (discordid TEXT NOT NULL, playerid TEXT NOT NULL, code TEXT NOT NULL, date DATETIME DEFAULT CURRENT_TIMESTAMP)");
-
-  // db.each("SELECT * FROM players", (err, row) => {
-  //   if (row && row.date && isNaN(row.date)) {
-  //     let newDate = moment(new Date(row.date)).unix() * 1000
-  //     // print(row.code, row.date, newDate)
-  //     db.run("UPDATE players SET date=? WHERE code=? AND date=?", [newDate, row.code, row.date], () => {});
-  //   }
-  // });
 
   const fs = require('fs');
   try {
@@ -48,17 +40,8 @@ db.serialize(() => {
 
 
 
-function wait(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
-}
 
 async function presentCaptcha(interaction, playerId) {
-  // if (!interaction.deferred && !interaction.replied) {
-  //   try {
-  //     await interaction.reply({ content: 'Fetching captcha...', ephemeral: true });
-  //   } catch (error) {}
-  // }
-
   let genRes = await axios.post('https://mail.survivorio.com/api/v1/captcha/generate').catch(() => {});
   if (!genRes || genRes.status != 200 || !genRes.data) {
     return await interaction.editReply({ content: 'Failed getting captcha. Try again later.' });
@@ -150,10 +133,8 @@ async function checkCanClaim(interaction, playerId) {
       claimDate.add(16, 'days');
     }
 
-    // print(prevClaim, claimDate)
     if (claimDate.month() > prevClaim.month()) {
       claimDate.second(0).minute(0).hour(0).date(1).month(prevClaim.month()+1)
-      // print(claimDate)
     }
     if (claimDate > moment()
       // && !config.isDeveloper(interaction.user.id)
