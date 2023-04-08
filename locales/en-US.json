@@ -1,0 +1,19 @@
+{
+	"Enter player id": "Enter player id",
+	"What is your survivor.io player id": "What is your survivor.io player id",
+	"Checking...": "Checking...",
+	"Fetching captcha...": "Fetching captcha...",
+	"Please enter the captcha below": "Please enter the captcha below",
+	"Solve captcha": "Solve captcha",
+	"What is the captcha solution": "What is the captcha solution",
+	"Checking captcha...": "Checking captcha...",
+	"Sorry there are no more codes available!": "Sorry there are no more codes available!",
+	"Something went wrong... Have you already received a reward this month?": "Something went wrong... Have you already received a reward this month?",
+	"Invalid playerid entered, try again": "Invalid playerid entered, try again",
+	"Failed getting captcha. Try again later.": "Failed getting captcha. Try again later.",
+	"You cannot claim another code until <t:{{claimDate}}:f> <t:{{claimDate}}:R>": "You cannot claim another code until <t:{{claimDate}}:f> <t:{{claimDate}}:R>",
+	"Invalid playerid `{{playerId}}`. Please check again.": "Invalid playerid `{{playerId}}`. Please check again.",
+	"Invalid captcha, try again": "Invalid captcha, try again",
+	"A problem occured when trying to redeem your gift-code. Please try again later.": "A problem occured when trying to redeem your gift-code. Please try again later.",
+	"Congratulations! Your rewards have been sent to your in-game Mailbox. Go and check it out!": "Congratulations! Your rewards have been sent to your in-game Mailbox. Go and check it out!"
+}
