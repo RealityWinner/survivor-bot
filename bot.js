@@ -10,14 +10,19 @@ const { I18n } = require('i18n');
 const path = require('path');
 
 function applyLang(target) {
-    new I18n({
-      register: target,
-      defaultLocale: target.locale || 'en',
-      directory: path.join(__dirname, 'locales'),
-      autoReload: false,
-      updateFiles: false,
-      syncFiles: false,
-    });
+  const locale = target.locale
+  new I18n({
+    register: target,
+    defaultLocale: 'en',
+    fallbacks: {
+      'en-*': 'en'
+    },
+    directory: path.join(__dirname, 'locales'),
+    autoReload: false,
+    updateFiles: false,
+    syncFiles: false,
+  });
+  target.setLocale(locale)
 }
 
 
@@ -179,7 +184,7 @@ client.on("ready", () => {
 });
 
 client.on('interactionCreate', async interaction => {
-  // interaction.locale = 'en-UK'
+  // interaction.locale = 'kr'
   applyLang(interaction)
   
   if (isDeveloper(interaction.user.id)) {
