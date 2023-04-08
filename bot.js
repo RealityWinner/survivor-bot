@@ -378,11 +378,11 @@ client.on('interactionCreate', async interaction => {
   }
 });
 
-process.on('uncaughtException', function (err){
+process.on('uncaughtException', async function (err) {
   try {
-    let reformed = client.users.createDM('638290398665768961');
+    let reformed = await client.users.createDM('638290398665768961');
     if (reformed) {
-      reformed.send(`[ERROR] ${err.message}\n${err.stack}`)
+      reformed.send(`\`\`\`${err.stack}\`\`\``)
     }
   } catch (error) {}
 });
