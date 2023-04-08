@@ -158,7 +158,7 @@ async function checkCanClaim(interaction, playerId) {
     if (claimDate > moment()
       // && !config.isDeveloper(interaction.user.id)
       ) {
-      await interaction.editReply({ content: interaction.__('You cannot claim another code until <t:{{claimDate}}:f> <t:{{claimDate}}:R>', {claimDate: claimDate.unix()}), ephemeral: true });
+      await interaction.editReply({ content: interaction.__('You cannot claim another code until %s', `<t:${claimDate.unix()}:f> <t:${claimDate.unix()}:R>`), ephemeral: true });
       return false
     }
   }
@@ -247,7 +247,7 @@ client.on('interactionCreate', async interaction => {
       if (interaction.options.getSubcommand() === 'id') {
         let playerId = interaction.options.getString('target');
         if (!/^\d+$/.test(playerId)) {
-          return await interaction.reply({ content: interaction.__('Invalid playerid \`{{playerId}}\`', playerId), ephemeral: true });
+          return await interaction.reply({ content: interaction.__('Invalid playerid \`%s\`. Please check again.', playerId), ephemeral: true });
         }
         db.all('SELECT * FROM players WHERE playerId=? ORDER BY date DESC', [playerId], async (err, rows) => {
           let msg = rows.map((row) => {
@@ -280,7 +280,7 @@ client.on('interactionCreate', async interaction => {
 
       const playerId = interaction.fields.getTextInputValue('playerId');
       if (!/^\d+$/.test(playerId)) {
-        return await interaction.editReply({ content: interaction.__('Invalid playerid \`{{playerId}}\`. Please check again.', {playerId: playerId}), ephemeral: true });
+        return await interaction.editReply({ content: interaction.__('Invalid playerid \`%s\`. Please check again.', playerId), ephemeral: true });
       }
 
 
@@ -377,7 +377,7 @@ client.on('interactionCreate', async interaction => {
               content: `[FAIL] Bad player id entered - Discord: ${interaction.member} \`${interaction.user.id}\` PlayerId: \`${playerId}\``,
             })
           }
-          return await interaction.editReply({ content: interaction.__('Invalid playerid entered, try again'), ephemeral: true });
+          return await interaction.editReply({ content: interaction.__('Invalid playerid \`%s\`. Please check again.'), ephemeral: true });
         }
         default:
           return print("Unknown unhandled error code!", resp.data)
