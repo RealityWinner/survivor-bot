@@ -25,14 +25,18 @@ let commands = [
         .setDMPermission(false),
     new SlashCommandBuilder()
         .setName('post')
-        .setDescription('Post the lookup button to a specific channel')
+        .setDescription('Post the gift button to a specific channel')
         .addChannelOption(option =>
-            option.setName('destination')
+            option.setName('channel')
                 .setDescription('Channel to post to')
                 .setRequired(true))
         .addStringOption(option =>
-            option.setName('text')
-                .setDescription('The body of the message to send')
+            option.setName('message')
+                .setDescription('The message to send')
+                .setRequired(true))
+        .addStringOption(option =>
+            option.setName('label')
+                .setDescription('The text of the button')
                 .setRequired(true))
         .setDMPermission(false),
     new SlashCommandBuilder()

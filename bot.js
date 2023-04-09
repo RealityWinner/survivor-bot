@@ -82,7 +82,7 @@ async function presentCaptcha(interaction, playerId) {
     .addComponents(
       new ButtonBuilder()
         .setCustomId(`captcha-${playerId}-${captchaId}`)
-        .setLabel('Enter captcha code')
+        .setLabel(interaction.__('Solve captcha'))
         .setStyle(ButtonStyle.Primary),
     );
   return await interaction.editReply({ content: interaction.__('Please enter the captcha below'), files: [captcha], components: [enterButton] });
@@ -198,16 +198,17 @@ client.on('interactionCreate', async interaction => {
     
 
     if (interaction.commandName === 'post') {
-      const channel = interaction.options.getChannel('destination');
-      const text = interaction.options.getString('text');
+      const channel = interaction.options.getChannel('channel');
+      const message = interaction.options.getString('message');
+      const label = interaction.options.getString('label');
 
       await channel.send({
-        content: text,
+        content: message,
         components: [new ActionRowBuilder()
           .addComponents(
             new ButtonBuilder()
               .setCustomId('getCode')
-              .setLabel('Get Monthly Gift')
+              .setLabel(label)
               .setStyle(ButtonStyle.Primary),
           )
         ]
