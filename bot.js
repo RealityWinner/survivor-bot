@@ -10,20 +10,28 @@ const { I18n } = require('i18n');
 const path = require('path');
 
 function applyLang(target) {
-  const locale = target.locale
+  const locale = target.locale || 'en'
   new I18n({
     register: target,
     defaultLocale: 'en',
     fallbacks: {
-      'en-*': 'en'
+      'en-*': 'en',
+      'es-*': 'es',
+      'pt-*': 'pt',
+      'sv-*': 'sv',
+      'zh-*': 'zh',
     },
     directory: path.join(__dirname, 'locales'),
     autoReload: false,
     updateFiles: false,
     syncFiles: false,
+    logDebugFn: ()=>{},
+    logWarnFn: ()=>{},
+    logErrorFn: print,
   });
   target.setLocale(locale)
 }
+applyLang({}) //test for logging errors at start
 
 
 const sqlite3 = require('sqlite3').verbose();
