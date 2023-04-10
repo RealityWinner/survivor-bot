@@ -1,7 +1,7 @@
 {
-	"Enter player id": "Enter player id",
-	"What is your survivor.io player id": "What is your survivor.io player id",
-	"Invalid playerid `%s`. Please check again.": "Invalid playerid `%s`. Please check again.",
+	"Enter player id": "Enter Player ID",
+	"What is your survivor.io player id": "What is your Survivor.io Player ID?",
+	"Invalid playerid `%s`. Please check again.": "Invalid Player ID `%s`. Please check again.",
 	"Checking...": "Checking...",
 	
 	"Fetching captcha...": "Fetching captcha...",
@@ -10,11 +10,11 @@
 	"Solve captcha": "Solve captcha",
 	"What is the captcha solution": "What is the captcha solution",
 	"Checking captcha...": "Checking captcha...",
-	"Invalid captcha, try again": "Invalid captcha, try again",
+	"Invalid captcha, try again": "Invalid captcha, try again.",
 
-	"You cannot claim another code until %s": "You cannot claim another code until %s",
-	"Sorry there are no more codes available!": "Sorry there are no more codes available!",
-	"Something went wrong... Have you already received a reward this month?": "Something went wrong... Have you already received a reward this month?",
-	"A problem occured when trying to redeem your gift-code. Please try again later.": "A problem occured when trying to redeem your gift-code. Please try again later.",
+	"You cannot claim another code until %s": "You cannot claim another gift until %s",
+	"Sorry there are no more codes available!": "Sorry there are no more gifts available!",
+	"Something went wrong... Have you already received a reward this month?": "Something went wrong... Have you already received a gift this month?",
+	"A problem occured when trying to redeem your gift-code. Please try again later.": "A problem occured when trying to redeem your gift. Please try again later.",
 	"Congratulations! Your rewards have been sent to your in-game Mailbox. Go and check it out!": "Congratulations! Your rewards have been sent to your in-game Mailbox. Go and check it out!"
 }
