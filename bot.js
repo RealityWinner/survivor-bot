@@ -285,7 +285,11 @@ client.on('interactionCreate', async interaction => {
 
   } else if (interaction.isModalSubmit()) {
     if (interaction.customId == 'idModal') {
-      await interaction.reply({ content: interaction.__('Checking...'), ephemeral: true });
+      try {
+        await interaction.reply({ content: interaction.__('Checking...'), ephemeral: true });
+      } catch (error) {
+        return print("Discord interaction error :(")
+      }
 
       const playerId = interaction.fields.getTextInputValue('playerId');
       if (!/^\d+$/.test(playerId)) {
@@ -301,7 +305,11 @@ client.on('interactionCreate', async interaction => {
 
     let [customId, playerId, captchaId] = interaction.customId.split('-')
     if (customId == 'captcha') {
-      await interaction.update({ content: interaction.__('Checking captcha...'), components: [], files: [] })
+      try {
+        await interaction.update({ content: interaction.__('Checking captcha...'), components: [], files: [] })
+      } catch (error) {
+        return print("Discord interaction error :(")
+      }
 
       const captcha = interaction.fields.getTextInputValue('captcha');
       if (!/^\d+$/.test(captcha) || captcha.length != 4) {
