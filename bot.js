@@ -226,7 +226,7 @@ client.on('interactionCreate', async interaction => {
         (SELECT used FROM nitro_codes GROUP BY used) as nitro_used,
         (SELECT count() FROM nitro_codes GROUP BY used) as nitro_total
         `, [], (err, row) => {
-          interaction.editReply(`🏓 Total ${new Date() - before}ms | API ${message.createdTimestamp - interaction.createdTimestamp}ms | WS ${Math.round(client.ws.ping)}ms | DB ${new Date() - after}ms
+          interaction.editReply(`Total ${new Date() - before}ms | API ${message.createdTimestamp - interaction.createdTimestamp}ms | WS ${Math.round(client.ws.ping)}ms | DB ${new Date() - after}ms
 Normal codes remaining: ${(row.codes_total - row.codes_used) / row.codes_total * 100}% (${row.codes_total - row.codes_used} / ${row.codes_total})
 Nitro codes remaining: ${(row.nitro_total - row.nitro_used) / row.nitro_total * 100}% (${row.nitro_total - row.nitro_used} / ${row.nitro_total})
 `);
