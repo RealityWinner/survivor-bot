@@ -210,6 +210,10 @@ client.on('interactionCreate', async interaction => {
       const message = interaction.options.getString('message');
       const label = interaction.options.getString('label');
 
+      if (!interaction.guild.members.me.permissionsIn(channel).has(PermissionsBitField.Flags.SendMessages, true)) {
+        return await interaction.reply({ content: `ERROR missing permissions to post in that channel.`, ephemeral: true });
+      }
+
       await channel.send({
         content: message,
         components: [new ActionRowBuilder()
