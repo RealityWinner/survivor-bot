@@ -186,9 +186,21 @@ const client = new Client({
 	],
 });
 
-client.on("ready", () => {
+client.on("ready", async () => {
   console.log(`Bot has started`); 
   client.user.setActivity(`Survivor.io`, {type: 'PLAYING'});
+
+
+  let channel = client.channels.cache.get(config.logChannel);
+  if (!channel) {
+    print(`Log channel ${config.logChannel} not found!`)
+    process.exit(1)
+  }
+
+  if (!channel.guild.members.me.permissionsIn(channel).has([PermissionsBitField.Flags.ViewChannel, PermissionsBitField.Flags.SendMessages], true)) {
+    print("Missing permissions to post in log channel")
+    process.exit(1)
+  }
 });
 
 client.on('interactionCreate', async interaction => {
@@ -210,7 +222,7 @@ client.on('interactionCreate', async interaction => {
       const message = interaction.options.getString('message');
       const label = interaction.options.getString('label');
 
-      if (!interaction.guild.members.me.permissionsIn(channel).has(PermissionsBitField.Flags.SendMessages, true)) {
+      if (!interaction.guild.members.me.permissionsIn(channel).has([PermissionsBitField.Flags.ViewChannel, PermissionsBitField.Flags.SendMessages], true)) {
         return await interaction.reply({ content: `ERROR missing permissions to post in that channel.`, ephemeral: true });
       }
 
