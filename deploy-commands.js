@@ -4,6 +4,9 @@ const { clientId, guildId, token } = require('./config.js');
 
 let commands = [
     new SlashCommandBuilder()
+        .setName('status')
+        .setDescription('Checks bot status'),
+    new SlashCommandBuilder()
         .setName('lookup')
         .setDescription('Looks up a playerid')
         .addSubcommand(subcommand =>

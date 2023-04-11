@@ -215,6 +215,23 @@ client.on('interactionCreate', async interaction => {
     if (!config.isDeveloper(interaction.user.id) && !interaction.member.permissions.has(PermissionsBitField.Flags.Administrator)) {
       return await interaction.reply({ content: `Sorry only admins :(`, ephemeral: true });
     }
+
+    if (interaction.commandName === 'status') {
+      interaction.reply({ content: `Checking...`, ephemeral: true }).then (async (message) =>{
+        db.get(`SELECT
+        (SELECT used FROM codes GROUP BY used) as codes_used,
+        (SELECT count() FROM codes GROUP BY used) as codes_total,
+        (SELECT used FROM nitro_codes GROUP BY used) as nitro_used,
+        (SELECT count() FROM nitro_codes GROUP BY used) as nitro_total
+        `, [], (err, row) => {
+          print(row)
+          message.edit(`API Latency is ${Math.round(client.ws.ping)}ms
+Normal codes remaining: ${(row.codes_total - row.codes_used) / row.codes_total * 100}% (${row.codes_total - row.codes_used} / ${row.codes_total})
+Nitro codes remaining: ${(row.nitro_total - row.nitro_used) / row.nitro_total * 100}% (${row.nitro_total - row.nitro_used} / ${row.nitro_total})
+`); //🏓Latency is ${message.createdTimestamp - interaction.createdTimestamp}ms.
+        })
+      })
+    }
     
 
     if (interaction.commandName === 'post') {
