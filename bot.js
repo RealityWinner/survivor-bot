@@ -1,6 +1,6 @@
 /* eslint-disable no-fallthrough */
 const print = console.log;
-const { Client, GatewayIntentBits, ActionRowBuilder, ButtonBuilder, ButtonStyle, ModalBuilder, TextInputBuilder, TextInputStyle, PermissionsBitField, AttachmentBuilder } = require('discord.js');
+const { Client, GatewayIntentBits, ActionRowBuilder, ButtonBuilder, ButtonStyle, ModalBuilder, TextInputBuilder, TextInputStyle, PermissionsBitField, AttachmentBuilder, ActivityType } = require('discord.js');
 const config = require('./config.js')
 const moment = require('moment')
 const axios = require('axios').create({ timeout: 5 * 60 * 1000 })
@@ -188,7 +188,7 @@ const client = new Client({
 
 client.on("ready", async () => {
   console.log(`Bot has started`); 
-  client.user.setActivity(`Survivor.io`, {type: 'PLAYING'});
+  client.user.setActivity(`Survivor.io`, {type: ActivityType.Playing });
 
 
   let channel = client.channels.cache.get(config.logChannel);
