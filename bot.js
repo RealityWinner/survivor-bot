@@ -51,7 +51,9 @@ db.serialize(() => {
         db.run("INSERT INTO codes(code) VALUES(?)", [line], () => {});
       }
     });
-  } catch (error) {}
+  } catch (error) {
+    print(error)
+  }
 
 
   try {
@@ -62,7 +64,9 @@ db.serialize(() => {
         db.run("INSERT INTO nitro_codes(code) VALUES(?)", [line], () => {});
       }
     });
-  } catch (error) {}
+  } catch (error) {
+    print(error)
+  }
 });
 
 
@@ -188,7 +192,7 @@ const client = new Client({
 
 client.on("ready", async () => {
   console.log(`Bot has started`); 
-  client.user.setActivity(`Survivor.io`, {type: ActivityType.Playing });
+  client.user.setActivity(`Survivor.io`, { type: ActivityType.Playing });
 
 
   let channel = client.channels.cache.get(config.logChannel);
@@ -221,14 +225,14 @@ client.on('interactionCreate', async interaction => {
       interaction.reply({ content: `Checking...`, ephemeral: true, fetchReply: true}).then (async (message) => {
         let after = new Date()
         db.get(`SELECT
-        (SELECT used FROM codes GROUP BY used) as codes_used,
-        (SELECT count() FROM codes GROUP BY used) as codes_total,
-        (SELECT used FROM nitro_codes GROUP BY used) as nitro_used,
-        (SELECT count() FROM nitro_codes GROUP BY used) as nitro_total
+        (SELECT count() FROM codes where used=0) as codes_left,
+        (SELECT count() FROM codes) as codes_total,
+        (SELECT count() FROM nitro_codes where used=0) as nitro_left,
+        (SELECT count() FROM nitro_codes) as nitro_total
         `, [], (err, row) => {
           interaction.editReply(`Real time total ${new Date() - before}ms | API ${message.createdTimestamp - interaction.createdTimestamp}ms | WS ${Math.round(client.ws.ping)}ms | DB ${new Date() - after}ms
-Normal codes remaining: ${(row.codes_total - row.codes_used) / row.codes_total * 100}% (${row.codes_total - row.codes_used} / ${row.codes_total})
-Nitro codes remaining: ${(row.nitro_total - row.nitro_used) / row.nitro_total * 100}% (${row.nitro_total - row.nitro_used} / ${row.nitro_total})
+Normal codes remaining: ${Math.round(row.codes_left / row.codes_total * 100)}% (${row.codes_left} / ${row.codes_total})
+Nitro codes remaining: ${Math.round(row.nitro_left / row.nitro_total * 100)}% (${row.nitro_left} / ${row.nitro_total})
 `);
         })
       })
