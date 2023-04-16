@@ -67,6 +67,17 @@ db.serialize(() => {
   } catch (error) {
     print(error)
   }
+
+  db.get(`SELECT
+  (SELECT count() FROM codes where used=0) as codes_left,
+  (SELECT count() FROM codes) as codes_total,
+  (SELECT count() FROM nitro_codes where used=0) as nitro_left,
+  (SELECT count() FROM nitro_codes) as nitro_total
+  `, [], (err, row) => {
+    print(`Done loading codes!
+Normal codes remaining: ${Math.round(row.codes_left / row.codes_total * 100)}% (${row.codes_left} / ${row.codes_total})
+Nitro codes remaining: ${Math.round(row.nitro_left / row.nitro_total * 100)}% (${row.nitro_left} / ${row.nitro_total})`)
+  });
 });
 
 
