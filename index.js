@@ -233,7 +233,7 @@ client.on('interactionCreate', async interaction => {
 
     if (interaction.commandName === 'status') {
       let before = new Date()
-      interaction.reply({ content: `Checking...`, ephemeral: true, fetchReply: true}).then (async (message) => {
+      interaction.reply({ content: `Checking...`, ephemeral: false, fetchReply: true}).then (async (message) => {
         let after = new Date()
         db.get(`SELECT
         (SELECT count() FROM codes where used=0) as codes_left,
