@@ -6,7 +6,7 @@
   "author": "Reformed",
   "main": "bot.js",
   "scripts": {
-    "start": "node bot.js",
+    "start": "node index.js",
     "deploy": "node deploy-commands.js",
     "watch": "npm-watch"
   },
@@ -15,6 +15,7 @@
   },
   "dependencies": {
     "axios": "^0.27.2",
+    "better-sqlite3": "^8.3.0",
     "discord.js": "^14.3.0",
     "dotenv": "^16.0.2",
     "i18n": "^0.15.1",

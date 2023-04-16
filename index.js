@@ -8,6 +8,7 @@ const sharp = require('sharp');
 const { isDeveloper } = require('./config.js');
 const { I18n } = require('i18n');
 const path = require('path');
+const fs = require('fs');
 
 function applyLang(target) {
   const locale = target.locale || 'en'
@@ -34,53 +35,64 @@ function applyLang(target) {
 applyLang({}) //test for logging errors at start
 
 
+let time = new Date()
+const bs = require('better-sqlite3')('database.sqlite');
+bs.exec("CREATE TABLE IF NOT EXISTS codes (code TEXT NOT NULL UNIQUE ON CONFLICT IGNORE, used BOOL DEFAULT FALSE)")
+bs.exec("CREATE TABLE IF NOT EXISTS nitro_codes (code TEXT NOT NULL UNIQUE ON CONFLICT IGNORE, used BOOL DEFAULT FALSE)");
+bs.exec("CREATE TABLE IF NOT EXISTS generic_codes (code TEXT NOT NULL UNIQUE, expired BOOL DEFAULT FALSE)");
+bs.exec("CREATE TABLE IF NOT EXISTS players (discordid TEXT NOT NULL, playerid TEXT NOT NULL, code TEXT NOT NULL, date DATETIME DEFAULT CURRENT_TIMESTAMP)");
+
+if (fs.existsSync('codes.txt')) {
+  const stmt = bs.prepare('INSERT INTO codes (code) VALUES (?)');
+  bs.transaction(() => {
+      let allFileContents = fs.readFileSync('codes.txt', 'utf-8');
+      allFileContents.split(/\r?\n/).forEach(line =>  {
+          line = line.trim()
+          if (line.length) {
+            try {
+              stmt.run(line);
+            } catch (error) {}
+          }
+      });
+  })()
+}
+
+if (fs.existsSync('nitro.txt')) {
+  const stmt = bs.prepare('INSERT INTO nitro_codes (code) VALUES (?)');
+  bs.transaction(() => {
+      let allFileContents = fs.readFileSync('nitro.txt', 'utf-8');
+      allFileContents.split(/\r?\n/).forEach(line =>  {
+          line = line.trim()
+          if (line.length) {
+            try {
+              stmt.run(line);
+            } catch (error) {}
+          }
+      });
+  })()
+}
+
+let row = bs.prepare(`SELECT
+(SELECT count() FROM codes where used=0) as codes_left,
+(SELECT count() FROM codes) as codes_total,
+(SELECT count() FROM nitro_codes where used=0) as nitro_left,
+(SELECT count() FROM nitro_codes) as nitro_total
+`).get()
+
+print(`Done loading codes! ${(new Date() - time) / 1000}s
+Normal codes remaining: ${Math.round(row.codes_left / row.codes_total * 100)}% (${row.codes_left} / ${row.codes_total})
+Nitro codes remaining: ${Math.round(row.nitro_left / row.nitro_total * 100)}% (${row.nitro_left} / ${row.nitro_total})
+`)
+
+bs.close()
+
+
+
+
+
+
 const sqlite3 = require('sqlite3').verbose();
 const db = new sqlite3.Database('database.sqlite');
-db.serialize(() => {
-  db.run("CREATE TABLE IF NOT EXISTS codes (code TEXT NOT NULL UNIQUE, used BOOL DEFAULT FALSE)");
-  db.run("CREATE TABLE IF NOT EXISTS nitro_codes (code TEXT NOT NULL UNIQUE, used BOOL DEFAULT FALSE)");
-  db.run("CREATE TABLE IF NOT EXISTS generic_codes (code TEXT NOT NULL UNIQUE, expired BOOL DEFAULT FALSE)");
-  db.run("CREATE TABLE IF NOT EXISTS players (discordid TEXT NOT NULL, playerid TEXT NOT NULL, code TEXT NOT NULL, date DATETIME DEFAULT CURRENT_TIMESTAMP)");
-
-  const fs = require('fs');
-  try {
-    let allFileContents = fs.readFileSync('codes.txt', 'utf-8');
-    allFileContents.split(/\r?\n/).forEach(line =>  {
-      line = line.trim()
-      if (line.length) {
-        db.run("INSERT INTO codes(code) VALUES(?)", [line], () => {});
-      }
-    });
-  } catch (error) {
-    print(error)
-  }
-
-
-  try {
-    let allFileContents = fs.readFileSync('nitro.txt', 'utf-8');
-    allFileContents.split(/\r?\n/).forEach(line =>  {
-      line = line.trim()
-      if (line.length) {
-        db.run("INSERT INTO nitro_codes(code) VALUES(?)", [line], () => {});
-      }
-    });
-  } catch (error) {
-    print(error)
-  }
-
-  db.get(`SELECT
-  (SELECT count() FROM codes where used=0) as codes_left,
-  (SELECT count() FROM codes) as codes_total,
-  (SELECT count() FROM nitro_codes where used=0) as nitro_left,
-  (SELECT count() FROM nitro_codes) as nitro_total
-  `, [], (err, row) => {
-    print(`Done loading codes!
-Normal codes remaining: ${Math.round(row.codes_left / row.codes_total * 100)}% (${row.codes_left} / ${row.codes_total})
-Nitro codes remaining: ${Math.round(row.nitro_left / row.nitro_total * 100)}% (${row.nitro_left} / ${row.nitro_total})`)
-  });
-});
-
-
 
 
 async function presentCaptcha(interaction, playerId) {
