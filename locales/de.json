@@ -1,0 +1,20 @@
+{
+	"Enter player id": "Spieler ID eingeben",
+	"What is your survivor.io player id": "Wie lautet deine Survivor.io Spieler ID?",
+	"Invalid playerid `%s`. Please check again.": "Ungültige Spieler ID `%s`. Eingaben bitte erneut prüfen.",
+	"Checking...": "Prüfen...",
+	
+	"Fetching captcha...": "Captcha laden...",
+	"Failed getting captcha. Try again later.": "Captcha konnte nicht geladen werden. Bitte versuche es zu einem späteren Zeitpunkt erneut.",
+	"Please enter the captcha below": "Bitte Captcha eingeben",
+	"Solve captcha": "Captcha lösen",
+	"What is the captcha solution": "Was ist die Lösung des Captcha?",
+	"Checking captcha...": "Captcha überprüfen...",
+	"Invalid captcha, try again": "Ungültiges Captcha. Bitte erneut eingeben. ",
+
+	"You cannot claim another code until %s": "Du kannst kein weiteres Geschenk abholen bis zum %s",
+	"Sorry there are no more codes available!": "Tut uns leid! Es sind keine weiteren Geschenke verfügbar.",
+	"Something went wrong... Have you already received a reward this month?": "Etwas ist schiefgelaufen... Hast du schon diesen Monat ein Geschenk erhalten?",
+	"A problem occured when trying to redeem your gift-code. Please try again later.": "Ein Problem ist aufgetreten während des Versuchs dein Geschenk einzulösen. Bitte später erneut probieren.",
+	"Congratulations! Your rewards have been sent to your in-game Mailbox. Go and check it out!": "Glückwunsch! Deine Belohnungen wurden an deinen In-Game Posteingang verschickt. Viel Spaß!"
+}
