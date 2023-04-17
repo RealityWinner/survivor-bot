@@ -240,18 +240,23 @@ client.on('interactionCreate', async interaction => {
   interaction.member.premiumSinceTimestamp = 0 //disable all nitro for now
 
 	if (interaction.isChatInputCommand()) {
-    if (interaction.commandName === 'credit') {
+    if (interaction.commandName === 'about') {
       if (!interaction.guild.members.me.permissionsIn(interaction.channel).has([PermissionsBitField.Flags.ViewChannel, PermissionsBitField.Flags.SendMessages], true)) {
         return await interaction.reply({ content: `ERROR missing permissions to post in this channel.`, ephemeral: true });
       }
 
-      return await interaction.reply({ content: `English and Bot by \`Reformed#1337\`
+      return await interaction.reply({ content: `Coded by \`Reformed#1337\`
+Hosted by \`三哥哥#3333\`
+English by \`Reformed#1337\`
 Korean by \`Bee🐝#7132\` and \`신우#2544\`
 Chinese by \`三哥哥#3333\`
 Vietnamese by \`Violet57#5009\`
 Dutch by \`vSolarian#5950\`
 French by \`Fukuda#9980\`
 Portuguese by \`Halt#2768\`
+Lithuanian by \`Supra#3918\`
+Swedish	by \`Timmetott#2528\`
+Spanish by \`jmedelotti#6079\`
 `})
     }
 
