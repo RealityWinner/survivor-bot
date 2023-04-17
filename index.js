@@ -262,11 +262,6 @@ Spanish by \`jmedelotti#6079\`
 
 
 
-
-    if (!config.isDeveloper(interaction.user.id) && !interaction.member.permissions.has(PermissionsBitField.Flags.Administrator)) {
-      return await interaction.reply({ content: `Sorry only admins :(`, ephemeral: true });
-    }
-
     if (interaction.commandName === 'status') {
       let before = new Date()
       interaction.reply({ content: `Checking...`, ephemeral: false, fetchReply: true}).then (async (message) => {
@@ -286,6 +281,11 @@ Nitro codes remaining: ${Math.round(row.nitro_left / row.nitro_total * 100)}% ($
     }
 
    
+
+
+    if (!config.isDeveloper(interaction.user.id) && !interaction.member.permissions.has(PermissionsBitField.Flags.Administrator)) {
+      return await interaction.reply({ content: `Sorry only admins :(`, ephemeral: true });
+    }
     
 
     if (interaction.commandName === 'post') {
