@@ -4,8 +4,8 @@ const { clientId, guildId, token } = require('./config.js');
 
 let commands = [
     new SlashCommandBuilder()
-        .setName('credit')
-        .setDescription('Translation credits'),
+        .setName('about')
+        .setDescription('Informations About Me'),
     new SlashCommandBuilder()
         .setName('status')
         .setDescription('Checks bot status'),
