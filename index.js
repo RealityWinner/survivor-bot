@@ -257,6 +257,7 @@ Portuguese by \`Halt#2768\`
 Lithuanian by \`Supra#3918\`
 Swedish by \`Timmetott#2528\`
 Spanish by \`jmedelotti#6079\`
+German by \`Choooki#1065\`
 `})
     }
 
