@@ -237,8 +237,27 @@ client.on('interactionCreate', async interaction => {
   if (isDeveloper(interaction.user.id)) {
     interaction.member.premiumSinceTimestamp = 1
   }
+  interaction.member.premiumSinceTimestamp = 0 //disable all nitro for now
 
 	if (interaction.isChatInputCommand()) {
+    if (interaction.commandName === 'credit') {
+      if (!interaction.guild.members.me.permissionsIn(interaction.channel).has([PermissionsBitField.Flags.ViewChannel, PermissionsBitField.Flags.SendMessages], true)) {
+        return await interaction.reply({ content: `ERROR missing permissions to post in this channel.`, ephemeral: true });
+      }
+
+      return await interaction.reply({ content: `English and Bot by \`Reformed#1337\`
+Korean by \`Bee🐝#7132\` and \`신우#2544\`
+Chinese by \`三哥哥#3333\`
+Vietnamese by \`Violet57#5009\`
+Dutch by \`vSolarian#5950\`
+French by \`Fukuda#9980\`
+Portuguese by \`Halt#2768\`
+`})
+    }
+
+
+
+
     if (!config.isDeveloper(interaction.user.id) && !interaction.member.permissions.has(PermissionsBitField.Flags.Administrator)) {
       return await interaction.reply({ content: `Sorry only admins :(`, ephemeral: true });
     }
@@ -260,6 +279,8 @@ Nitro codes remaining: ${Math.round(row.nitro_left / row.nitro_total * 100)}% ($
         })
       })
     }
+
+   
     
 
     if (interaction.commandName === 'post') {
