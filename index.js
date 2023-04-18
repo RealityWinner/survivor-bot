@@ -247,8 +247,6 @@ client.on('interactionCreate', async interaction => {
 
       return await interaction.reply({ content: `Coded by \`Reformed#1337\`
 Hosted by \`三哥哥#3333\`
-English by \`Reformed#1337\`
-Chinese by \`三哥哥#3333\`
 Korean by \`Bee🐝#7132\` and \`신우#2544\`
 Vietnamese by \`Violet57#5009\`
 Dutch by \`vSolarian#5950\`
@@ -258,6 +256,7 @@ Lithuanian by \`Supra#3918\`
 Swedish by \`Timmetott#2528\`
 Spanish by \`jmedelotti#6079\`
 German by \`Choooki#1065\`
+Ukrainian by \`PlayMe#1288\`
 `})
     }
 
