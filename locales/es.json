@@ -12,7 +12,7 @@
 	"Checking captcha...": "Verificando captcha...",
 	"Invalid captcha, try again": "Captcha inválido, inténtalo otra vez.",
 
-	"You cannot claim another code until %s": "No puedes reclamar otro regalo hasta %s",
+	"You cannot claim another code until %s": "No puedes reclamar otro regalo hasta el %s",
 	"Sorry there are no more codes available!": "Perdona no hay más regalos disponibles!",
 	"Something went wrong... Have you already received a reward this month?": "Algo fue mal... Ya has recibido el regalo del mes?",
 	"A problem occured when trying to redeem your gift-code. Please try again later.": "Un problema ocurrió cuando intentaste reclamar tu regalo. Por favor inténtalo más tarde.",
