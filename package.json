@@ -6,8 +6,7 @@
   "author": "Reformed",
   "main": "bot.js",
   "scripts": {
-    "start": "node index.js",
-    "deploy": "node deploy-commands.js",
+    "start": "node deploy.js && node index.js",
     "watch": "npm-watch"
   },
   "watch": {
