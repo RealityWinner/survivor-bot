@@ -372,11 +372,7 @@ Nitro codes remaining: ${Math.round(row.nitro_left / row.nitro_total * 100)}% ($
 
   } else if (interaction.isModalSubmit()) {
     if (interaction.customId == 'idModal') {
-      try {
-        await interaction.reply({ content: interaction.__('Checking...'), ephemeral: true });
-      } catch (error) {
-        return print("Discord interaction error :(")
-      }
+      await interaction.reply({ content: interaction.__('Checking...'), ephemeral: true });
 
       const playerId = interaction.fields.getTextInputValue('playerId');
       if (!/^\d+$/.test(playerId)) {
@@ -392,11 +388,7 @@ Nitro codes remaining: ${Math.round(row.nitro_left / row.nitro_total * 100)}% ($
 
     let [customId, playerId, captchaId] = interaction.customId.split('-')
     if (customId == 'captcha') {
-      try {
-        await interaction.update({ content: interaction.__('Checking captcha...'), components: [], files: [] })
-      } catch (error) {
-        return print("Discord interaction error :(")
-      }
+      await interaction.update({ content: interaction.__('Checking captcha...'), components: [], files: [] })
 
       const captcha = interaction.fields.getTextInputValue('captcha');
       if (!/^\d+$/.test(captcha) || captcha.length != 4) {
@@ -505,6 +497,11 @@ Nitro codes remaining: ${Math.round(row.nitro_left / row.nitro_total * 100)}% ($
 });
 
 process.on('uncaughtException', async function (err) {
+  if (err.name == 'DiscordAPIError' && err.code == 10062) {
+    print("Unknown interaction :(")
+    return
+  }
+
   print(err)
   try {
     let reformed = await client.users.createDM('638290398665768961');
