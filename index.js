@@ -237,7 +237,7 @@ client.on('interactionCreate', async interaction => {
   if (isDeveloper(interaction.user.id)) {
     interaction.member.premiumSinceTimestamp = 1
   }
-  interaction.member.premiumSinceTimestamp = 0 //disable all nitro for now
+  //interaction.member.premiumSinceTimestamp = 0 //disable all nitro
 
 	if (interaction.isChatInputCommand()) {
     if (interaction.commandName === 'about') {
@@ -407,7 +407,7 @@ Nitro codes remaining: ${Math.round(row.nitro_left / row.nitro_total * 100)}% ($
 
       if (!await checkCanClaim(interaction, playerId)) { return }
 
-      let table = "codes"//(interaction.member.premiumSinceTimestamp && moment.utc().date() > 16) ? "nitro_codes" : "codes"
+      let table = (interaction.member.premiumSinceTimestamp && moment.utc().date() > 16) ? "nitro_codes" : "codes"
       let row = await new Promise((resolve, reject) => {
         db.get(`SELECT * FROM ${table} WHERE used=FALSE ORDER BY RANDOM() LIMIT 1`, [], (err, row) => {
           if (err) { reject(err) } else { resolve(row) }
