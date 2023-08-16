@@ -149,7 +149,7 @@ async function presentIdModal(interaction) {
   try {
     await interaction.showModal(modal);
   } catch (error) {
-    print("Discord interaction error attempting to show playerId modal :(")
+    print("Discord interaction error attempting to show playerID modal :(")
   }
 }
 
@@ -237,7 +237,7 @@ client.on('interactionCreate', async interaction => {
   if (isDeveloper(interaction.user.id)) {
     interaction.member.premiumSinceTimestamp = 1
   }
-  interaction.member.premiumSinceTimestamp = 0 //disable all nitro for now
+  //interaction.member.premiumSinceTimestamp = 0 //disable all nitro
 
 	if (interaction.isChatInputCommand()) {
     if (interaction.commandName === 'about') {
@@ -335,22 +335,22 @@ Nitro codes remaining: ${Math.round(row.nitro_left / row.nitro_total * 100)}% ($
         db.all('SELECT * FROM players WHERE discordId=? ORDER BY date DESC', [user.id], async (err, rows) => {
           let msg = rows.map((row) => {
             let claimDate = moment(new Date(row.date)).unix();
-            return `Discord: ${row.discordid} PlayerId: ${row.playerid} Code: ${row.code} RedeemedAt: <t:${claimDate}:f> <t:${claimDate}:R>`
+            return `Discord: ${row.discordid} PlayerID: ${row.playerid} Code: ${row.code} RedeemedAt: <t:${claimDate}:f> <t:${claimDate}:R>`
           }).join('\n')
-          return await interaction.reply({ content: msg || "None", ephemeral: true });
+          return await interaction.reply({ content: msg || "None", ephemeral: false });
         });
       }
       if (interaction.options.getSubcommand() === 'id') {
         let playerId = interaction.options.getString('target');
         if (!/^\d+$/.test(playerId)) {
-          return await interaction.reply({ content: interaction.__('Invalid playerid \`%s\`. Please check again.', playerId), ephemeral: true });
+          return await interaction.reply({ content: interaction.__('Invalid playerID \`%s\`. Please check again.', playerId), ephemeral: true });
         }
         db.all('SELECT * FROM players WHERE playerId=? ORDER BY date DESC', [playerId], async (err, rows) => {
           let msg = rows.map((row) => {
             let claimDate = moment(new Date(row.date)).unix();
-            return `Discord: ${row.discordid} PlayerId: ${row.playerid} Code: ${row.code} RedeemedAt: <t:${claimDate}:f> <t:${claimDate}:R>`
+            return `Discord: ${row.discordid} PlayerID: ${row.playerid} Code: ${row.code} RedeemedAt: <t:${claimDate}:f> <t:${claimDate}:R>`
           }).join('\n')
-          return await interaction.reply({ content: msg || "None", ephemeral: true });
+          return await interaction.reply({ content: msg || "None", ephemeral: false });
         });
       }
     }
@@ -376,7 +376,7 @@ Nitro codes remaining: ${Math.round(row.nitro_left / row.nitro_total * 100)}% ($
 
       const playerId = interaction.fields.getTextInputValue('playerId');
       if (!/^\d+$/.test(playerId)) {
-        return await interaction.editReply({ content: interaction.__('Invalid playerid \`%s\`. Please check again.', playerId), ephemeral: true });
+        return await interaction.editReply({ content: interaction.__('Invalid PlayerID \`%s\`. Please check again.', playerId), ephemeral: true });
       }
 
 
@@ -399,7 +399,7 @@ Nitro codes remaining: ${Math.round(row.nitro_left / row.nitro_total * 100)}% ($
 
       if (!await checkCanClaim(interaction, playerId)) { return }
 
-      let table = "codes"//(interaction.member.premiumSinceTimestamp && moment.utc().date() > 16) ? "nitro_codes" : "codes"
+      let table = (interaction.member.premiumSinceTimestamp && moment.utc().date() > 16) ? "nitro_codes" : "codes"
       let row = await new Promise((resolve, reject) => {
         db.get(`SELECT * FROM ${table} WHERE used=FALSE ORDER BY RANDOM() LIMIT 1`, [], (err, row) => {
           if (err) { reject(err) } else { resolve(row) }
@@ -418,7 +418,7 @@ Nitro codes remaining: ${Math.round(row.nitro_left / row.nitro_total * 100)}% ($
       if (!resp || !resp.data) {
         return await interaction.editReply({ content: interaction.__('A problem occured when trying to redeem your gift-code. Please try again later.') });
       }
-      print(resp.status, resp.data)
+      // print(resp.status, resp.data)
 
 
 // 0 === e ? this.newArr[0][20] //Congratulations! Your rewards have been sent to your in-game Mailbox. Go and check it out!
@@ -442,7 +442,7 @@ Nitro codes remaining: ${Math.round(row.nitro_left / row.nitro_total * 100)}% ($
           let channel = client.channels.cache.get(config.logChannel);
           if (channel) {
             channel.send({
-              content: `[FAIL] Discord: ${interaction.member} \`${interaction.user.id}\` PlayerId: \`${playerId}\` - already claimed this month?`// <@638290398665768961> <@213081486583136256>`
+              content: `[FAIL] Discord: ${interaction.member} \`${interaction.user.username}#${interaction.user.discriminator}\`${interaction.user.id}\` PlayerID: \`${playerId}\` Locale: \`${interaction.locale}\` - already claimed this month? <@638290398665768961> <@523114942434639873>`
             })
           }
           return await interaction.editReply({ content: interaction.__('Something went wrong... Have you already received a reward this month?'), ephemeral: true });
@@ -470,10 +470,10 @@ Nitro codes remaining: ${Math.round(row.nitro_left / row.nitro_total * 100)}% ($
           let channel = client.channels.cache.get(config.logChannel);
           if (channel) {
             channel.send({
-              content: `[FAIL] Bad player id entered - Discord: ${interaction.member} \`${interaction.user.id}\` PlayerId: \`${playerId}\``,
+              content: `[FAIL] Bad player id entered - Discord: ${interaction.member} \`${interaction.user.username}#${interaction.user.discriminator}\`${interaction.user.id}\` PlayerID: \`${playerId}\` Locale: \`${interaction.locale}\``,
             })
           }
-          return await interaction.editReply({ content: interaction.__('Invalid playerid \`%s\`. Please check again.'), ephemeral: true });
+          return await interaction.editReply({ content: interaction.__('Invalid PlayerID \`%s\`. Please check again.'), ephemeral: true });
         }
         default:
           return print("Unknown unhandled error code!", resp.data)
@@ -483,11 +483,11 @@ Nitro codes remaining: ${Math.round(row.nitro_left / row.nitro_total * 100)}% ($
       db.run(`UPDATE ${table} SET used=TRUE WHERE code = ?`, [row.code], () => {});
       db.run(`INSERT INTO players(discordid, playerid, code, date) VALUES(?, ?, ?, ?)`, [interaction.user.id, playerId, row.code, moment().unix() * 1000], () => {});
 
-      print(`Redeem success Discord: ${interaction.member.displayName} \`${interaction.user.id}\` PlayerId: \`${playerId}\` Code: \`${row.code}\``)
+      print(`Redeem success Discord: ${interaction.user.username}#${interaction.user.discriminator} ${interaction.user.id} PlayerID: ${playerId} Code: ${row.code} Locale: ${interaction.locale}`)
       let channel = client.channels.cache.get(config.logChannel);
       if (channel) {
         channel.send({
-          content: `[REDEEM] Discord: ${interaction.member} \`${interaction.user.id}\` PlayerId: \`${playerId}\` Code: \`${row.code}\` Locale: \`${interaction.locale}\``,
+          content: `[REDEEM] Discord: ${interaction.member} \`${interaction.user.username}#${interaction.user.discriminator}\` \`${interaction.user.id}\` PlayerID: \`${playerId}\` Code: \`${row.code}\` Locale: \`${interaction.locale}\``,
         })
       }
 
