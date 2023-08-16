@@ -182,14 +182,13 @@ async function checkCanClaim(interaction, playerId) {
   if (row && row.date) {
     let prevClaim = moment(new Date(row.date)).utc();
 
-    let claimDate = prevClaim.clone().utc().add(16, 'days');
-    if (!interaction.member.premiumSinceTimestamp) {
-      claimDate.add(16, 'days');
-    }
-
-    if (claimDate.month() > prevClaim.month()) {
+    let claimDate = prevClaim.clone().utc();
+    if (interaction.member.premiumSinceTimestamp && prevClaim.date() < 16) {
+      claimDate.date(16);
+    } else {
       claimDate.second(0).minute(0).hour(0).date(1).month(prevClaim.month()+1)
     }
+
     if (claimDate > moment()
       // && !config.isDeveloper(interaction.user.id)
       ) {
@@ -399,7 +398,7 @@ Nitro codes remaining: ${Math.round(row.nitro_left / row.nitro_total * 100)}% ($
 
       if (!await checkCanClaim(interaction, playerId)) { return }
 
-      let table = (interaction.member.premiumSinceTimestamp && moment.utc().date() > 16) ? "nitro_codes" : "codes"
+      let table = (interaction.member.premiumSinceTimestamp && moment.utc().date() >= 16) ? "nitro_codes" : "codes"
       let row = await new Promise((resolve, reject) => {
         db.get(`SELECT * FROM ${table} WHERE used=FALSE ORDER BY RANDOM() LIMIT 1`, [], (err, row) => {
           if (err) { reject(err) } else { resolve(row) }
