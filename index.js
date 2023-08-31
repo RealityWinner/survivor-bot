@@ -96,7 +96,7 @@ const db = new sqlite3.Database('database.sqlite');
 
 
 async function presentCaptcha(interaction, playerId) {
-  let genRes = await axios.post('https://mail.survivorio.com/api/v1/captcha/generate').catch(() => {});
+  let genRes = await axios.post(`https://${config.host}/api/v1/captcha/generate`).catch(() => {});
   if (!genRes || genRes.status != 200 || !genRes.data) {
     return await interaction.editReply({ content: interaction.__('Failed getting captcha. Try again later.') });
   }
@@ -105,7 +105,7 @@ async function presentCaptcha(interaction, playerId) {
   }
 
   let captchaId = genRes.data.data.captchaId;
-  let imageRes = await axios.get(`https://mail.survivorio.com/api/v1/captcha/image/${captchaId}`, { responseType: 'arraybuffer' }).catch(() => {});
+  let imageRes = await axios.get(`https://${config.host}/api/v1/captcha/image/${captchaId}`, { responseType: 'arraybuffer' }).catch(() => {});
   if (!imageRes || imageRes.status != 200 || !imageRes.data || !imageRes.data.length) {
     return await interaction.editReply({ content: interaction.__('Failed getting captcha. Try again later.') });
   }
@@ -131,7 +131,7 @@ async function presentIdModal(interaction) {
     .setTitle(interaction.__('Enter player id'));
   const playerIdInput = new TextInputBuilder()
     .setCustomId('playerId')
-    .setLabel(interaction.__('What is your survivor.io player id'))
+    .setLabel(interaction.__('Enter player id'))
     .setMinLength(8)
     .setMaxLength(8)
     .setStyle(TextInputStyle.Short);
@@ -214,7 +214,7 @@ const client = new Client({
 
 client.on("ready", async () => {
   console.log(`Bot has started`); 
-  client.user.setActivity(`Survivor.io`, { type: ActivityType.Playing });
+  client.user.setActivity(config.game, { type: ActivityType.Playing });
 
 
   let channel = client.channels.cache.get(config.logChannel);
@@ -245,7 +245,6 @@ client.on('interactionCreate', async interaction => {
       }
 
       return await interaction.reply({ content: `Coded by \`Reformed#1337\`
-Hosted by \`三哥哥#3333\`
 Korean by \`Bee🐝#7132\` and \`신우#2544\`
 Vietnamese by \`Violet57#5009\`
 Dutch by \`vSolarian#5950\`
@@ -408,7 +407,9 @@ Nitro codes remaining: ${Math.round(row.nitro_left / row.nitro_total * 100)}% ($
         return await interaction.editReply({ content: interaction.__('Sorry there are no more codes available!') });
       }
 
-      let resp = await axios.post('https://mail.survivorio.com/api/v1/giftcode/claim', {
+      // https://game.soulssvc.com/habbygame/mail/api/v1/captcha/generate
+      // https://mail.survivorio.com/api/v1/giftcode/claim
+      let resp = await axios.post(`https://${config.host}/api/v1/giftcode/claim`, {
         userId: playerId,
         giftCode: row.code,
         captchaId: captchaId,
