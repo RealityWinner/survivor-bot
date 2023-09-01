@@ -333,7 +333,7 @@ Nitro codes remaining: ${Math.round(row.nitro_left / row.nitro_total * 100)}% ($
         db.all('SELECT * FROM players WHERE discordId=? ORDER BY date DESC', [user.id], async (err, rows) => {
           let msg = rows.map((row) => {
             let claimDate = moment(new Date(row.date)).unix();
-            return `Discord: ${row.discordid} PlayerID: ${row.playerid} Code: ${row.code} RedeemedAt: <t:${claimDate}:f> <t:${claimDate}:R>`
+            return `Discord: \`${row.discordid}\` PlayerID: \`${row.playerid}\` Code: \`${row.code}\` RedeemedAt: <t:${claimDate}:f> <t:${claimDate}:R>`
           }).join('\n')
           return await interaction.reply({ content: msg || "None", ephemeral: false });
         });
@@ -346,7 +346,7 @@ Nitro codes remaining: ${Math.round(row.nitro_left / row.nitro_total * 100)}% ($
         db.all('SELECT * FROM players WHERE playerId=? ORDER BY date DESC', [playerId], async (err, rows) => {
           let msg = rows.map((row) => {
             let claimDate = moment(new Date(row.date)).unix();
-            return `Discord: ${row.discordid} PlayerID: ${row.playerid} Code: ${row.code} RedeemedAt: <t:${claimDate}:f> <t:${claimDate}:R>`
+            return `Discord: \`${row.discordid}\` PlayerID: \`${row.playerid}\` Code: \`${row.code}\` RedeemedAt: <t:${claimDate}:f> <t:${claimDate}:R>`
           }).join('\n')
           return await interaction.reply({ content: msg || "None", ephemeral: false });
         });
