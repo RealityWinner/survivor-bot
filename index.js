@@ -473,7 +473,7 @@ Nitro codes remaining: ${Math.round(row.nitro_left / row.nitro_total * 100)}% ($
               content: `[FAIL] Bad player id entered - Discord: ${interaction.member} \`${interaction.user.username}#${interaction.user.discriminator} ${interaction.user.id}\` PlayerID: \`${playerId}\` Locale: \`${interaction.locale}\``,
             })
           }
-          return await interaction.editReply({ content: interaction.__('Invalid PlayerID \`%s\`. Please check again.'), ephemeral: true });
+          return await interaction.editReply({ content: interaction.__('Invalid PlayerID \`%s\`. Please check again.', playerId), ephemeral: true });
         }
         default:
           return print("Unknown unhandled error code!", resp.data)
