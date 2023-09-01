@@ -442,7 +442,7 @@ Nitro codes remaining: ${Math.round(row.nitro_left / row.nitro_total * 100)}% ($
           let channel = client.channels.cache.get(config.logChannel);
           if (channel) {
             channel.send({
-              content: `[FAIL] Discord: ${interaction.member} \`${interaction.user.username}#${interaction.user.discriminator}\`${interaction.user.id}\` PlayerID: \`${playerId}\` Locale: \`${interaction.locale}\` - already claimed this month? <@638290398665768961> <@523114942434639873>`
+              content: `[FAIL] Discord: ${interaction.member} \`${interaction.user.username}#${interaction.user.discriminator} ${interaction.user.id}\` PlayerID: \`${playerId}\` Locale: \`${interaction.locale}\` - already claimed this month? <@523114942434639873>`
             })
           }
           return await interaction.editReply({ content: interaction.__('Something went wrong... Have you already received a reward this month?'), ephemeral: true });
@@ -470,7 +470,7 @@ Nitro codes remaining: ${Math.round(row.nitro_left / row.nitro_total * 100)}% ($
           let channel = client.channels.cache.get(config.logChannel);
           if (channel) {
             channel.send({
-              content: `[FAIL] Bad player id entered - Discord: ${interaction.member} \`${interaction.user.username}#${interaction.user.discriminator}\`${interaction.user.id}\` PlayerID: \`${playerId}\` Locale: \`${interaction.locale}\``,
+              content: `[FAIL] Bad player id entered - Discord: ${interaction.member} \`${interaction.user.username}#${interaction.user.discriminator} ${interaction.user.id}\` PlayerID: \`${playerId}\` Locale: \`${interaction.locale}\``,
             })
           }
           return await interaction.editReply({ content: interaction.__('Invalid PlayerID \`%s\`. Please check again.'), ephemeral: true });
