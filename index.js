@@ -132,7 +132,7 @@ async function presentIdModal(interaction) {
   const playerIdInput = new TextInputBuilder()
     .setCustomId('playerId')
     .setLabel(interaction.__('Enter player id'))
-    .setMinLength(8)
+    .setMinLength(4)
     .setMaxLength(8)
     .setStyle(TextInputStyle.Short);
   
