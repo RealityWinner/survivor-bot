@@ -1,6 +1,6 @@
 const { SlashCommandBuilder, Routes } = require('discord.js');
 const { REST } = require('@discordjs/rest');
-const { clientId, guildId, token } = require('./config.js');
+const config = require('./config.js')
 
 let commands = [
     new SlashCommandBuilder()
@@ -52,8 +52,8 @@ let commands = [
 ]
 .map(command => command.toJSON());
 
-const rest = new REST({ version: '10' }).setToken(token);
-rest.put(Routes.applicationCommands(clientId), { body: commands })
+const rest = new REST({ version: '10' }).setToken(config.token);
+rest.put(Routes.applicationCommands(config.clientId), { body: commands })
     .then((data) => console.log(`Successfully registered ${data.length} application commands.`))
     .catch(console.error);
 
@@ -67,6 +67,6 @@ commands = [
 ]
 .map(command => command.toJSON());
 
-rest.put(Routes.applicationGuildCommands(clientId, guildId), { body: commands })
+rest.put(Routes.applicationGuildCommands(config.clientId, config.guildId), { body: commands })
     .then((data) => console.log(`Successfully registered ${data.length} guild commands.`))
     .catch(console.error);

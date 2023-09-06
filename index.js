@@ -497,12 +497,16 @@ Nitro codes remaining: ${Math.round(row.nitro_left / row.nitro_total * 100)}% ($
 });
 
 process.on('uncaughtException', async function (err) {
+  print(err.name, err.code);
   if (err.name == 'DiscordAPIError' && err.code == 10062) {
     print("Unknown interaction :(")
     return
   }
+  if (err.name == 'ConnectTimeoutError') {
+    print("captcha timeout :(")
+    return
+  }
 
-  print(err)
   try {
     let reformed = await client.users.createDM('638290398665768961');
     if (reformed) {
