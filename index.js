@@ -55,6 +55,7 @@ if (fs.existsSync('codes.txt')) {
           }
       });
   })()
+  fs.rmSync('codes.txt')
 }
 
 if (fs.existsSync('nitro.txt')) {
@@ -70,6 +71,7 @@ if (fs.existsSync('nitro.txt')) {
           }
       });
   })()
+  fs.rmSync('nitro.txt')
 }
 
 let row = bs.prepare(`SELECT
