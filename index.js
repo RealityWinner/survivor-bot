@@ -1,6 +1,6 @@
 /* eslint-disable no-fallthrough */
 const print = console.log;
-const { Client, GatewayIntentBits, ActionRowBuilder, ButtonBuilder, ButtonStyle, ModalBuilder, TextInputBuilder, TextInputStyle, PermissionsBitField, AttachmentBuilder, ActivityType } = require('discord.js');
+const { Client, GatewayIntentBits, Partials, ActionRowBuilder, ButtonBuilder, ButtonStyle, ModalBuilder, TextInputBuilder, TextInputStyle, PermissionsBitField, AttachmentBuilder, ActivityType } = require('discord.js');
 const config = require('./config.js')
 const moment = require('moment')
 const axios = require('axios').create({ timeout: 5 * 60 * 1000 })
@@ -84,7 +84,7 @@ Normal codes remaining: ${Math.round(row.codes_left / row.codes_total * 100)}% (
 Nitro codes remaining: ${Math.round(row.nitro_left / row.nitro_total * 100)}% (${row.nitro_left} / ${row.nitro_total})
 `)
 
-bs.close()
+// bs.close()
 
 
 
@@ -209,7 +209,14 @@ async function checkCanClaim(interaction, playerId) {
 const client = new Client({
 	intents: [
 		GatewayIntentBits.Guilds,
+    GatewayIntentBits.GuildMembers,
+    GatewayIntentBits.DirectMessages,
+    GatewayIntentBits.MessageContent,
 	],
+  partials: [
+    Partials.Channel,
+    Partials.Message
+  ],
 });
 
 client.on("ready", async () => {
@@ -233,12 +240,15 @@ client.on('interactionCreate', async interaction => {
   // interaction.locale = 'kr'
   applyLang(interaction)
   
-  if (isDeveloper(interaction.user.id)) {
+  if (isDeveloper(interaction.user.id) && interaction.member) {
     interaction.member.premiumSinceTimestamp = 1
   }
   //interaction.member.premiumSinceTimestamp = 0 //disable all nitro
 
 	if (interaction.isChatInputCommand()) {
+    if (interaction.channel.isDMBased() && !isDeveloper(interaction.user.id)) {
+      return await interaction.reply("NO DM!")
+    }
     if (interaction.commandName === 'about') {
       if (!interaction.guild.members.me.permissionsIn(interaction.channel).has([PermissionsBitField.Flags.ViewChannel, PermissionsBitField.Flags.SendMessages], true)) {
         return await interaction.reply({ content: `ERROR missing permissions to post in this channel.`, ephemeral: true });
@@ -493,6 +503,59 @@ Nitro codes remaining: ${Math.round(row.nitro_left / row.nitro_total * 100)}% ($
 
       return await interaction.editReply({ content: interaction.__('Congratulations! Your rewards have been sent to your in-game Mailbox. Go and check it out!'), ephemeral: true });
     }
+  }
+});
+
+
+client.on("messageCreate", async message => {
+  if (message.guild) return;
+  if (!config.isDeveloper(message.author.id)) return;
+  // print(message)
+
+
+  switch (message.content) {
+    case "help":
+      message.reply(`Available commands:
+- \`reset\` : Marks all codes as used. Use before adding new codes for the next month.
+- \`codes\` : Use when uploading a text file with new **normal** codes
+- \`nitro\` : Use when uploading a text file with new **nitro** codes
+- \`backup\` : Backup a copy of the database
+`);
+      break;
+    case "codes":
+    case "nitro":
+      if (!message.attachments || !message.attachments.size) {
+        return await message.reply("No attachement. Upload a text file with the codes with this command.")
+      }
+      message.attachments.forEach(async (attachement, key) => {
+        let codes = await axios.get(attachement.url).catch(() => {});
+
+        let table = message.content == 'nitro' ? 'nitro_codes': 'codes';
+        const stmt = bs.prepare(`INSERT INTO ${table} (code) VALUES (?)`);
+        bs.transaction(() => {
+            codes.data.split(/\r?\n/).forEach(line =>  {
+                line = line.trim()
+                if (line.length) {
+                  try {
+                    stmt.run(line);
+                  } catch (error) {}
+                }
+            });
+        })()
+      });
+      message.reply("Inserting codes! Check /status")
+      break;
+    case "reset":
+      await message.reply({content: "Clearing DB of used codes! Check /status", files: [new AttachmentBuilder('database.sqlite')]});
+      db.run(`UPDATE nitro_codes SET used=TRUE`, [], () => {});
+      db.run(`UPDATE codes SET used=TRUE`, [], () => {});
+      break;
+    case "backup":
+      await message.reply({content: "Here you go :)", files: [new AttachmentBuilder('database.sqlite')]});
+      break;
+    default:
+      message.reply("Unknown command. Try `help`");
+      break;
   }
 });
 
