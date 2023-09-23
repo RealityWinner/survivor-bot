@@ -547,8 +547,8 @@ client.on("messageCreate", async message => {
       break;
     case "reset":
       await message.reply({content: "Clearing DB of used codes! Check /status", files: [new AttachmentBuilder('database.sqlite')]});
-      db.run(`UPDATE nitro_codes SET used=TRUE`, [], () => {});
-      db.run(`UPDATE codes SET used=TRUE`, [], () => {});
+      db.run(`DELETE FROM nitro_codes`, [], () => {});
+      db.run(`DELETE FROM codes`, [], () => {});
       break;
     case "backup":
       await message.reply({content: "Here you go :)", files: [new AttachmentBuilder('database.sqlite')]});
