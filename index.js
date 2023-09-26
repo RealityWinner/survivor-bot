@@ -235,6 +235,14 @@ client.on("ready", async () => {
     print("Missing permissions to post in log channel")
     process.exit(1)
   }
+
+  client.guilds.fetch().then((guilds) => {
+    for (let [_, guild] of guilds) {
+      client.guilds.fetch(guild.id).then(g => {
+        print(guild.id, guild.name, g.memberCount)
+      })
+    }
+  })
 });
 
 client.on('interactionCreate', async interaction => {
@@ -251,9 +259,7 @@ client.on('interactionCreate', async interaction => {
       return await interaction.reply("NO DM!")
     }
     if (interaction.commandName === 'about') {
-      if (!interaction.guild.members.me.permissionsIn(interaction.channel).has([PermissionsBitField.Flags.ViewChannel, PermissionsBitField.Flags.SendMessages], true)) {
-        return await interaction.reply({ content: `ERROR missing permissions to post in this channel.`, ephemeral: true });
-      }
+      let ephemeral = !interaction.guild.members.me.permissionsIn(interaction.channel).has([PermissionsBitField.Flags.ViewChannel, PermissionsBitField.Flags.SendMessages], true);
 
       return await interaction.reply({ content: `Coded by \`Reformed#1337\`
 Korean by \`Bee🐝#7132\` and \`신우#2544\`
@@ -266,7 +272,7 @@ Swedish by \`Timmetott#2528\`
 Spanish by \`jmedelotti#6079\`
 German by \`Choooki#1065\`
 Ukrainian by \`PlayMe#1288\`
-`})
+`, ephemeral: ephemeral})
     }
 
 
