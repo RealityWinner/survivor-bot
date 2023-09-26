@@ -518,7 +518,7 @@ client.on("messageCreate", async message => {
   switch (message.content) {
     case "help":
       message.reply(`Available commands:
-- \`reset\` : Marks all codes as used. Use before adding new codes for the next month.
+- \`reset\` : Deletes all current codes. Use before adding new codes for the next month.
 - \`codes\` : Use when uploading a text file with new **normal** codes
 - \`nitro\` : Use when uploading a text file with new **nitro** codes
 - \`backup\` : Backup a copy of the database
@@ -562,8 +562,7 @@ client.on("messageCreate", async message => {
 });
 
 process.on('uncaughtException', async function (err) {
-  print(err.name, err.code);
-  if (err.name == 'DiscordAPIError' && err.code == 10062) {
+  if (err.name == 'DiscordAPIError[10062]') {
     print("Unknown interaction :(")
     return
   }
@@ -571,11 +570,12 @@ process.on('uncaughtException', async function (err) {
     print("captcha timeout :(")
     return
   }
+  print(err);
 
   try {
     let reformed = await client.users.createDM('638290398665768961');
     if (reformed) {
-      reformed.send(`\`\`\`${err.stack}\`\`\``)
+      reformed.send(`\`\`\`${err.name}\n${err.stack}\`\`\``)
     }
   } catch (error) {}
 });
