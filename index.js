@@ -5,7 +5,6 @@ const config = require('./config.js')
 const moment = require('moment')
 const axios = require('axios').create({ timeout: 5 * 60 * 1000 })
 const sharp = require('sharp');
-const { isDeveloper } = require('./config.js');
 const { I18n } = require('i18n');
 const path = require('path');
 const fs = require('fs');
@@ -242,13 +241,13 @@ client.on('interactionCreate', async interaction => {
   // interaction.locale = 'kr'
   applyLang(interaction)
   
-  if (isDeveloper(interaction.user.id) && interaction.member) {
+  if (config.isDeveloper(interaction.user.id) && interaction.member) {
     interaction.member.premiumSinceTimestamp = 1
   }
   //interaction.member.premiumSinceTimestamp = 0 //disable all nitro
 
 	if (interaction.isChatInputCommand()) {
-    if (interaction.channel.isDMBased() && !isDeveloper(interaction.user.id)) {
+    if (interaction.channel.isDMBased() && !config.isDeveloper(interaction.user.id)) {
       return await interaction.reply("NO DM!")
     }
     if (interaction.commandName === 'about') {
